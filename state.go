@@ -804,21 +804,17 @@ func (ls *LState) currentLocalBase() int {
 
 func (ls *LState) currentEnv() *LTable {
 	return ls.Env
-	/*
-		if ls.currentFrame == nil {
-			return ls.Env
-		}
-		return ls.currentFrame.Fn.Env
-	*/
+	// if ls.currentFrame == nil {
+	// 	return ls.Env
+	// }
+	// return ls.currentFrame.Fn.Env
 }
 
 func (ls *LState) rkValue(idx int) LValue {
-	/*
-		if OpIsK(idx) {
-			return ls.currentFrame.Fn.Proto.Constants[opIndexK(idx)]
-		}
-		return ls.reg.Get(ls.currentFrame.LocalBase + idx)
-	*/
+	// if OpIsK(idx) {
+	// 	return ls.currentFrame.Fn.Proto.Constants[opIndexK(idx)]
+	// }
+	// return ls.reg.Get(ls.currentFrame.LocalBase + idx)
 	if (idx & opBitRk) != 0 {
 		return ls.currentFrame.Fn.Proto.Constants[idx & ^opBitRk]
 	}
@@ -962,23 +958,22 @@ func (ls *LState) initCallFrame(cf *callFrame) {
 			}
 			ls.reg.top = cf.LocalBase + int(proto.NumUsedRegisters)
 		} else {
-			/* swap vararg positions:
-					   closure
-					   namedparam1 <- lbase
-					   namedparam2
-					   vararg1
-					   vararg2
-
-			           TO
-
-					   closure
-					   nil
-					   nil
-					   vararg1
-					   vararg2
-					   namedparam1 <- lbase
-					   namedparam2
-			*/
+			// Swap vararg positions:
+			//     closure
+			//     namedparam1 <- lbase
+			//     namedparam2
+			//     vararg1
+			//     vararg2
+			//
+			//     TO
+			//
+			//     closure
+			//     nil
+			//     nil
+			//     vararg1
+			//     vararg2
+			//     namedparam1 <- lbase
+			//     namedparam2
 			nvarargs := nargs - np
 			if nvarargs < 0 {
 				nvarargs = 0
@@ -1669,7 +1664,7 @@ func (ls *LState) SetFEnv(obj LValue, env LValue) {
 	case *LState:
 		lv.Env = tb
 	}
-	/* do nothing */
+	// Do nothing.
 }
 
 //// Table operations

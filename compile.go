@@ -1158,12 +1158,10 @@ func compileFunctionExpr(context *funcContext, funcexpr *ast.FunctionExpr, ec *e
 
 func compileTableExpr(context *funcContext, reg int, ex *ast.TableExpr, ec *expcontext) {
 	code := context.Code
-	/*
-		tablereg := savereg(ec, reg)
-		if tablereg == reg {
-			reg += 1
-		}
-	*/
+	// tablereg := savereg(ec, reg)
+	// if tablereg == reg {
+	// 	reg += 1
+	// }
 	tablereg := reg
 	reg++
 	code.AddABC(OP_NEWTABLE, tablereg, 0, 0, sline(ex))
@@ -1383,7 +1381,7 @@ func compileLogicalOpExpr(context *funcContext, reg int, expr *ast.LogicalOpExpr
 }
 
 func compileLogicalOpExprAux(context *funcContext, reg int, expr ast.Expr, ec *expcontext, thenlabel, elselabel int, hasnextcond bool, lb *lblabels) {
-	// TODO folding constants?
+	//TODO: Folding constants?
 	code := context.Code
 	flip := 0
 	jumplabel := elselabel
@@ -1585,7 +1583,7 @@ func patchCode(context *funcContext) {
 		case OP_SETGLOBAL, OP_SETUPVAL, OP_EQ, OP_LT, OP_LE, OP_TEST,
 			OP_TAILCALL, OP_RETURN, OP_FORPREP, OP_FORLOOP, OP_TFORLOOP,
 			OP_SETLIST, OP_CLOSE:
-			/* nothing to do */
+			// Nothing to do.
 		case OP_CALL:
 			if reg := opGetArgA(inst) + opGetArgC(inst) - 2; reg > maxreg {
 				maxreg = reg

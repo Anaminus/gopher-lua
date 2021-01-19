@@ -151,7 +151,8 @@ func fileIsWritable(L *LState, file *lFile) int {
 	if file.writer == nil {
 		L.Push(LNil)
 		L.Push(LString(fmt.Sprintf("%s is opened for only reading.", file.Name())))
-		L.Push(LNumber(1)) // C-Lua compatibility: Original Lua pushes errno to the stack
+		// C-Lua compatibility: Original Lua pushes errno to the stack.
+		L.Push(LNumber(1))
 		return 3
 	}
 	return 0
@@ -161,7 +162,8 @@ func fileIsReadable(L *LState, file *lFile) int {
 	if file.reader == nil {
 		L.Push(LNil)
 		L.Push(LString(fmt.Sprintf("%s is opened for only writing.", file.Name())))
-		L.Push(LNumber(1)) // C-Lua compatibility: Original Lua pushes errno to the stack
+		// C-Lua compatibility: Original Lua pushes errno to the stack.
+		L.Push(LNumber(1))
 		return 3
 	}
 	return 0
@@ -254,7 +256,8 @@ errreturn:
 	file.AbandonReadBuffer()
 	L.Push(LNil)
 	L.Push(LString(err.Error()))
-	L.Push(LNumber(1)) // C-Lua compatibility: Original Lua pushes errno to the stack
+	// C-Lua compatibility: Original Lua pushes errno to the stack.
+	L.Push(LNumber(1))
 	return 3
 }
 
@@ -279,10 +282,10 @@ func fileCloseAux(L *LState, file *lFile) int {
 		return 1
 	case lFileProcess:
 		if file.stdout != nil {
-			file.stdout.Close() // ignore errors
+			file.stdout.Close() // Ignore errors.
 		}
 		err = file.pp.Wait()
-		var exitStatus int // Initialised to zero value = 0
+		var exitStatus int // Initialised to zero value = 0.
 		if err != nil {
 			if e2, ok := err.(*exec.ExitError); ok {
 				if s, ok := e2.Sys().(syscall.WaitStatus); ok {
@@ -515,7 +518,7 @@ func fileSetVBuf(L *LState) int {
 				goto errreturn
 			}
 		}
-	case "full", "line": // TODO line buffer not supported
+	case "full", "line": //TODO: Line buffer not supported.
 		bufsize := L.OptInt(3, fileDefaultWriteBuffer)
 		switch file.Type() {
 		case lFileFile:
@@ -644,7 +647,8 @@ func ioOpenFile(L *LState) int {
 	if err != nil {
 		L.Push(LNil)
 		L.Push(LString(err.Error()))
-		L.Push(LNumber(1)) // C-Lua compatibility: Original Lua pushes errno to the stack
+		// C-Lua compatibility: Original Lua pushes errno to the stack.
+		L.Push(LNumber(1))
 		return 3
 	}
 	L.Push(file)
@@ -742,5 +746,3 @@ func ioOutput(L *LState) int {
 func ioWrite(L *LState) int {
 	return fileWriteAux(L, fileDefOut(L).Value.(*lFile), 1)
 }
-
-//

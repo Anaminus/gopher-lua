@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-/* checkType {{{ */
+//// checkType
 
 func (ls *LState) CheckAny(n int) LValue {
 	if n > ls.GetTop() {
@@ -132,9 +132,7 @@ func (ls *LState) CheckOption(n int, options []string) int {
 	return 0
 }
 
-/* }}} */
-
-/* optType {{{ */
+//// optType
 
 func (ls *LState) OptInt(n int, d int) int {
 	v := ls.Get(n)
@@ -232,9 +230,7 @@ func (ls *LState) OptUserData(n int, d *LUserData) *LUserData {
 	return nil
 }
 
-/* }}} */
-
-/* error operations {{{ */
+//// Error operations
 
 func (ls *LState) ArgError(n int, message string) {
 	ls.RaiseError("bad argument #%v to %v (%v)", n, ls.rawFrameFuncName(ls.currentFrame), message)
@@ -244,17 +240,13 @@ func (ls *LState) TypeError(n int, typ LValueType) {
 	ls.RaiseError("bad argument #%v to %v (%v expected, got %v)", n, ls.rawFrameFuncName(ls.currentFrame), typ.String(), ls.Get(n).Type().String())
 }
 
-/* }}} */
-
-/* debug operations {{{ */
+//// Debug operations
 
 func (ls *LState) Where(level int) string {
 	return ls.where(level, false)
 }
 
-/* }}} */
-
-/* table operations {{{ */
+//// Table operations
 
 func (ls *LState) FindTable(obj *LTable, n string, size int) LValue {
 	names := strings.Split(n, ".")
@@ -277,9 +269,7 @@ func (ls *LState) FindTable(obj *LTable, n string, size int) LValue {
 	return curobj
 }
 
-/* }}} */
-
-/* register operations {{{ */
+//// Register operations
 
 func (ls *LState) RegisterModule(name string, funcs map[string]LGFunction) LValue {
 	tb := ls.FindTable(ls.Get(RegistryIndex).(*LTable), "_LOADED", 1)
@@ -306,9 +296,7 @@ func (ls *LState) SetFuncs(tb *LTable, funcs map[string]LGFunction, upvalues ...
 	return tb
 }
 
-/* }}} */
-
-/* metatable operations {{{ */
+//// Metatable operations
 
 func (ls *LState) NewTypeMetatable(typ string) *LTable {
 	regtable := ls.Get(RegistryIndex)
@@ -340,9 +328,7 @@ func (ls *LState) CallMeta(obj LValue, event string) LValue {
 	return LNil
 }
 
-/* }}} */
-
-/* load and function call operations {{{ */
+//// Load and function call operations
 
 func (ls *LState) LoadFile(path string) (*LFunction, error) {
 	var file *os.File
@@ -358,14 +344,14 @@ func (ls *LState) LoadFile(path string) (*LFunction, error) {
 	}
 
 	reader := bufio.NewReader(file)
-	// get the first character.
+	// Get the first character.
 	c, err := reader.ReadByte()
 	if err != nil && err != io.EOF {
 		return nil, newApiErrorE(ApiErrorFile, err)
 	}
 	if c == byte('#') {
 		// Unix exec. file?
-		// skip first line
+		// Skip first line.
 		_, err, _ = readBufioLine(reader)
 		if err != nil {
 			return nil, newApiErrorE(ApiErrorFile, err)
@@ -373,8 +359,8 @@ func (ls *LState) LoadFile(path string) (*LFunction, error) {
 	}
 
 	if err != io.EOF {
-		// if the file is not empty,
-		// unread the first character of the file or newline character(readBufioLine's last byte).
+		// If the file is not empty, unread the first character of the file or
+		// newline character (readBufioLine's last byte).
 		err = reader.UnreadByte()
 		if err != nil {
 			return nil, newApiErrorE(ApiErrorFile, err)
@@ -406,11 +392,10 @@ func (ls *LState) DoString(source string) error {
 	}
 }
 
-/* }}} */
-
-/* GopherLua original APIs {{{ */
+//// GopherLua original APIs
 
 // ToStringMeta returns string representation of given LValue.
+//
 // This method calls the `__tostring` meta method if defined.
 func (ls *LState) ToStringMeta(lv LValue) LValue {
 	if fn, ok := ls.metaOp1(lv, "__tostring").assertFunction(); ok {
@@ -423,7 +408,7 @@ func (ls *LState) ToStringMeta(lv LValue) LValue {
 	}
 }
 
-// Set a module loader to the package.preload table.
+// PreloadModule sets a module loader to the package.preload table.
 func (ls *LState) PreloadModule(name string, loader LGFunction) {
 	preload := ls.GetField(ls.GetField(ls.Get(EnvironIndex), "package"), "preload")
 	if _, ok := preload.(*LTable); !ok {
@@ -432,7 +417,8 @@ func (ls *LState) PreloadModule(name string, loader LGFunction) {
 	ls.SetField(preload, name, ls.NewFunction(loader))
 }
 
-// Checks whether the given index is an LChannel and returns this channel.
+// CheckChannel checks whether the given index is an LChannel and returns this
+// channel.
 func (ls *LState) CheckChannel(n int) chan LValue {
 	v := ls.Get(n)
 	if ch, ok := v.(LChannel); ok {
@@ -442,7 +428,9 @@ func (ls *LState) CheckChannel(n int) chan LValue {
 	return nil
 }
 
-// If the given index is a LChannel, returns this channel. If this argument is absent or is nil, returns ch. Otherwise, raises an error.
+// OptChannel checks if the given index is a LChannel, and returns this channel
+// if so. If this argument is absent or is nil, returns ch. Otherwise, raises an
+// error.
 func (ls *LState) OptChannel(n int, ch chan LValue) chan LValue {
 	v := ls.Get(n)
 	if v == LNil {
@@ -454,7 +442,3 @@ func (ls *LState) OptChannel(n int, ch chan LValue) chan LValue {
 	ls.TypeError(n, LTChannel)
 	return nil
 }
-
-/* }}} */
-
-//

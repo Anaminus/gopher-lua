@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-/* basic functions {{{ */
+//// Basic functions
 
 func OpenBase(L *LState) int {
 	global := L.Get(GlobalsIndex).(*LTable)
@@ -51,7 +51,7 @@ var baseFuncs = map[string]LGFunction{
 	// loadlib
 	"module":  loModule,
 	"require": loRequire,
-	// hidden features
+	// Hidden features.
 	"newproxy": baseNewProxy,
 }
 
@@ -413,7 +413,7 @@ func baseToNumber(L *LState) int {
 			}
 		} else {
 			if noBase && strings.HasPrefix(strings.ToLower(str), "0x") {
-				base, str = 16, str[2:] // Hex number
+				base, str = 16, str[2:] // Hex number.
 			}
 			if v, err := strconv.ParseInt(str, base, LNumberBit); err != nil {
 				L.Push(LNil)
@@ -472,9 +472,7 @@ func baseXPCall(L *LState) int {
 	}
 }
 
-/* }}} */
-
-/* load lib {{{ */
+//// Load lib
 
 func loModule(L *LState) int {
 	name := L.CheckString(1)
@@ -571,9 +569,7 @@ loopbreak:
 	return 1
 }
 
-/* }}} */
-
-/* hidden features {{{ */
+//// Hidden features
 
 func baseNewProxy(L *LState) int {
 	ud := L.NewUserData()
@@ -586,7 +582,3 @@ func baseNewProxy(L *LState) int {
 	L.Push(ud)
 	return 1
 }
-
-/* }}} */
-
-//

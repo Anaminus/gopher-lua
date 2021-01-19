@@ -20,13 +20,14 @@ const RegistryIndex = -10000
 const EnvironIndex = -10001
 const GlobalsIndex = -10002
 
-/* ApiError {{{ */
+//// ApiError
 
 type ApiError struct {
 	Type       ApiErrorType
 	Object     LValue
 	StackTrace string
-	// Underlying error. This attribute is set only if the Type is ApiErrorFile or ApiErrorSyntax
+	// Underlying error. This attribute is set only if the Type is ApiErrorFile
+	// or ApiErrorSyntax.
 	Cause error
 }
 
@@ -59,9 +60,7 @@ const (
 	ApiErrorPanic
 )
 
-/* }}} */
-
-/* ResumeState {{{ */
+//// ResumeState
 
 type ResumeState int
 
@@ -71,9 +70,7 @@ const (
 	ResumeError
 )
 
-/* }}} */
-
-/* P {{{ */
+//// P
 
 type P struct {
 	Fn      LValue
@@ -82,9 +79,7 @@ type P struct {
 	Handler *LFunction
 }
 
-/* }}} */
-
-/* Options {{{ */
+//// Options
 
 // Options is a configuration that is used to create a new LState.
 type Options struct {
@@ -92,24 +87,26 @@ type Options struct {
 	CallStackSize int
 	// Data stack size. This defaults to `lua.RegistrySize`.
 	RegistrySize int
-	// Allow the registry to grow from the registry size specified up to a value of RegistryMaxSize. A value of 0
-	// indicates no growth is permitted. The registry will not shrink again after any growth.
+	// Allow the registry to grow from the registry size specified up to a value
+	// of RegistryMaxSize. A value of 0 indicates no growth is permitted. The
+	// registry will not shrink again after any growth.
 	RegistryMaxSize int
-	// If growth is enabled, step up by an additional `RegistryGrowStep` each time to avoid having to resize too often.
-	// This defaults to `lua.RegistryGrowStep`
+	// If growth is enabled, step up by an additional `RegistryGrowStep` each
+	// time to avoid having to resize too often. This defaults to
+	// `lua.RegistryGrowStep`.
 	RegistryGrowStep int
-	// Controls whether or not libraries are opened by default
+	// Controls whether or not libraries are opened by default.
 	SkipOpenLibs bool
-	// Tells whether a Go stacktrace should be included in a Lua stacktrace when panics occur.
+	// Tells whether a Go stacktrace should be included in a Lua stacktrace when
+	// panics occur.
 	IncludeGoStackTrace bool
-	// If `MinimizeStackMemory` is set, the call stack will be automatically grown or shrank up to a limit of
-	// `CallStackSize` in order to minimize memory usage. This does incur a slight performance penalty.
+	// If `MinimizeStackMemory` is set, the call stack will be automatically
+	// grown or shrank up to a limit of `CallStackSize` in order to minimize
+	// memory usage. This does incur a slight performance penalty.
 	MinimizeStackMemory bool
 }
 
-/* }}} */
-
-/* Debug {{{ */
+//// Debug
 
 type Debug struct {
 	frame           *callFrame
@@ -122,9 +119,7 @@ type Debug struct {
 	LastLineDefined int
 }
 
-/* }}} */
-
-/* callFrame {{{ */
+//// callFrame
 
 type callFrame struct {
 	Idx        int
@@ -205,11 +200,12 @@ func (cs *fixedCallFrameStack) Pop() *callFrame {
 }
 
 func (cs *fixedCallFrameStack) FreeAll() {
-	// nothing to do for fixed callframestack
+	// Nothing to do for fixed callframestack.
 }
 
-// FramesPerSegment should be a power of 2 constant for performance reasons. It will allow the go compiler to change
-// the divs and mods into bitshifts. Max is 256 due to current use of uint8 to count how many frames in a segment are
+// FramesPerSegment should be a power of 2 constant for performance reasons. It
+// will allow the go compiler to change the divs and mods into bitshifts. Max is
+// 256 due to current use of uint8 to count how many frames in a segment are
 // used.
 const FramesPerSegment = 8
 
@@ -220,9 +216,11 @@ type segIdx uint16
 type autoGrowingCallFrameStack struct {
 	segments []*callFrameStackSegment
 	segIdx   segIdx
-	// segSp is the number of frames in the current segment which are used. Full 'sp' value is segIdx * FramesPerSegment + segSp.
-	// It points to the next stack slot to use, so 0 means to use the 0th element in the segment, and a value of
-	// FramesPerSegment indicates that the segment is full and cannot accommodate another frame.
+	// segSp is the number of frames in the current segment which are used. Full
+	// 'sp' value is segIdx * FramesPerSegment + segSp. It points to the next
+	// stack slot to use, so 0 means to use the 0th element in the segment, and
+	// a value of FramesPerSegment indicates that the segment is full and cannot
+	// accommodate another frame.
 	segSp uint8
 }
 
@@ -240,8 +238,9 @@ func freeCallFrameStackSegment(seg *callFrameStackSegment) {
 	segmentPool.Put(seg)
 }
 
-// newCallFrameStack allocates a new stack for a lua state, which will auto grow up to a max size of at least maxSize.
-// it will actually grow up to the next segment size multiple after maxSize, where the segment size is dictated by
+// newCallFrameStack allocates a new stack for a lua state, which will auto grow
+// up to a max size of at least maxSize. it will actually grow up to the next
+// segment size multiple after maxSize, where the segment size is dictated by
 // FramesPerSegment.
 func newAutoGrowingCallFrameStack(maxSize int) callFrameStack {
 	cs := &autoGrowingCallFrameStack{
@@ -256,7 +255,8 @@ func (cs *autoGrowingCallFrameStack) IsEmpty() bool {
 	return cs.segIdx == 0 && cs.segSp == 0
 }
 
-// IsFull returns true if the stack cannot receive any more stack pushes without overflowing
+// IsFull returns true if the stack cannot receive any more stack pushes without
+// overflowing
 func (cs *autoGrowingCallFrameStack) IsFull() bool {
 	return int(cs.segIdx) == len(cs.segments) && cs.segSp >= FramesPerSegment
 }
@@ -277,12 +277,12 @@ func (cs *autoGrowingCallFrameStack) FreeAll() {
 	}
 }
 
-// Push pushes the passed callFrame onto the stack. it panics if the stack is full, caller should call IsFull() before
-// invoking this to avoid this.
+// Push pushes the passed callFrame onto the stack. it panics if the stack is
+// full, caller should call IsFull() before invoking this to avoid this.
 func (cs *autoGrowingCallFrameStack) Push(v callFrame) {
 	curSeg := cs.segments[cs.segIdx]
 	if cs.segSp >= FramesPerSegment {
-		// segment full, push new segment if allowed
+		// Segment full, push new segment if allowed.
 		if cs.segIdx < segIdx(len(cs.segments)-1) {
 			curSeg = newCallFrameStackSegment()
 			cs.segIdx++
@@ -297,13 +297,15 @@ func (cs *autoGrowingCallFrameStack) Push(v callFrame) {
 	cs.segSp++
 }
 
-// Sp retrieves the current stack depth, which is the number of frames currently pushed on the stack.
+// Sp retrieves the current stack depth, which is the number of frames currently
+// pushed on the stack.
 func (cs *autoGrowingCallFrameStack) Sp() int {
 	return int(cs.segSp) + int(cs.segIdx)*FramesPerSegment
 }
 
-// SetSp can be used to rapidly unwind the stack, freeing all stack frames on the way. It should not be used to
-// allocate new stack space, use Push() for that.
+// SetSp can be used to rapidly unwind the stack, freeing all stack frames on
+// the way. It should not be used to allocate new stack space, use Push() for
+// that.
 func (cs *autoGrowingCallFrameStack) SetSp(sp int) {
 	desiredSegIdx := segIdx(sp / FramesPerSegment)
 	desiredFramesInLastSeg := uint8(sp % FramesPerSegment)
@@ -337,12 +339,12 @@ func (cs *autoGrowingCallFrameStack) At(sp int) *callFrame {
 	return &cs.segments[segIdx].array[frameIdx]
 }
 
-// Pop pops off the most recent stack frame and returns it
+// Pop pops off the most recent stack frame and returns it.
 func (cs *autoGrowingCallFrameStack) Pop() *callFrame {
 	curSeg := cs.segments[cs.segIdx]
 	if cs.segSp == 0 {
 		if cs.segIdx == 0 {
-			// stack empty
+			// Stack empty.
 			return nil
 		}
 		freeCallFrameStackSegment(curSeg)
@@ -355,9 +357,7 @@ func (cs *autoGrowingCallFrameStack) Pop() *callFrame {
 	return &curSeg.array[cs.segSp]
 }
 
-/* }}} */
-
-/* registry {{{ */
+//// registry
 
 type registryHandler interface {
 	registryOverflow()
@@ -382,7 +382,7 @@ func (rg *registry) checkSize(requiredSize int) {
 }
 
 func (rg *registry) resize(requiredSize int) {
-	newSize := requiredSize + rg.growBy // give some padding
+	newSize := requiredSize + rg.growBy // Give some padding.
 	if newSize > rg.maxSize {
 		newSize = rg.maxSize
 	}
@@ -395,7 +395,9 @@ func (rg *registry) resize(requiredSize int) {
 
 func (rg *registry) forceResize(newSize int) {
 	newSlice := make([]LValue, newSize)
-	copy(newSlice, rg.array[:rg.top]) // should we copy the area beyond top? there shouldn't be any valid values there so it shouldn't be necessary.
+	// Should we copy the area beyond top? there shouldn't be any valid values
+	// there so it shouldn't be necessary.
+	copy(newSlice, rg.array[:rg.top])
 	rg.array = newSlice
 }
 func (rg *registry) SetTop(top int) {
@@ -405,8 +407,9 @@ func (rg *registry) SetTop(top int) {
 	for i := oldtop; i < rg.top; i++ {
 		rg.array[i] = LNil
 	}
-	// values beyond top don't need to be valid LValues, so setting them to nil is fine
-	// setting them to nil rather than LNil lets us invoke the golang memclr opto
+	// Values beyond top don't need to be valid LValues, so setting them to nil
+	// is fine. Setting them to nil rather than LNil lets us invoke the golang
+	// memclr opto.
 	if rg.top < oldtop {
 		nilRange := rg.array[rg.top:oldtop]
 		for i := range nilRange {
@@ -440,14 +443,19 @@ func (rg *registry) Get(reg int) LValue {
 	return rg.array[reg]
 }
 
-// CopyRange will move a section of values from index `start` to index `regv`
+// CopyRange will move a section of values from index `start` to index `regv`.
 // It will move `n` values.
-// `limit` specifies the maximum end range that can be copied from. If it's set to -1, then it defaults to stopping at
-// the top of the registry (values beyond the top are not initialized, so if specifying an alternative `limit` you should
-// pass a value <= rg.top.
-// If start+n is beyond the limit, then nil values will be copied to the destination slots.
-// After the copy, the registry is truncated to be at the end of the copied range, ie the original of the copied values
-// are nilled out. (So top will be regv+n)
+//
+// `limit` specifies the maximum end range that can be copied from. If it's set
+// to -1, then it defaults to stopping at the top of the registry. Values beyond
+// the top are not initialized, so if specifying an alternative `limit` you
+// should pass a value <= rg.top. If start+n is beyond the limit, then nil
+// values will be copied to the destination slots.
+//
+// After the copy, the registry is truncated to be at the end of the copied
+// range, ie the original of the copied values are nilled out. (So top will be
+// regv+n)
+//
 // CopyRange should ideally be renamed to MoveRange.
 func (rg *registry) CopyRange(regv, start, limit, n int) {
 	newSize := regv + n
@@ -464,8 +472,9 @@ func (rg *registry) CopyRange(regv, start, limit, n int) {
 		}
 	}
 
-	// values beyond top don't need to be valid LValues, so setting them to nil is fine
-	// setting them to nil rather than LNil lets us invoke the golang memclr opto
+	// Values beyond top don't need to be valid LValues, so setting them to nil
+	// is fine setting them to nil rather than LNil lets us invoke the golang
+	// memclr opto.
 	oldtop := rg.top
 	rg.top = regv + n
 	if rg.top < oldtop {
@@ -476,15 +485,17 @@ func (rg *registry) CopyRange(regv, start, limit, n int) {
 	}
 }
 
-// FillNil fills the registry with nil values from regm to regm+n and then sets the registry top to regm+n
+// FillNil fills the registry with nil values from regm to regm+n and then sets
+// the registry top to regm+n.
 func (rg *registry) FillNil(regm, n int) {
 	newSize := regm + n
 	rg.checkSize(newSize)
 	for i := 0; i < n; i++ {
 		rg.array[regm+i] = LNil
 	}
-	// values beyond top don't need to be valid LValues, so setting them to nil is fine
-	// setting them to nil rather than LNil lets us invoke the golang memclr opto
+	// Values beyond top don't need to be valid LValues, so setting them to nil
+	// is fine setting them to nil rather than LNil lets us invoke the golang
+	// memclr opto.
 	oldtop := rg.top
 	rg.top = regm + n
 	if rg.top < oldtop {
@@ -503,7 +514,7 @@ func (rg *registry) Insert(value LValue, reg int) {
 	}
 	top--
 	for ; top >= reg; top-- {
-		// FIXME consider using copy() here if Insert() is called enough
+		//TODO: Consider using copy() here if Insert() is called enough.
 		rg.Set(top+1, rg.Get(top))
 	}
 	rg.Set(reg, value)
@@ -531,9 +542,7 @@ func (rg *registry) IsFull() bool {
 	return rg.top >= cap(rg.array)
 }
 
-/* }}} */
-
-/* Global {{{ */
+//// Global
 
 func newGlobal() *Global {
 	return &Global{
@@ -545,9 +554,7 @@ func newGlobal() *Global {
 	}
 }
 
-/* }}} */
-
-/* package local methods {{{ */
+//// Package local methods
 
 func panicWithTraceback(L *LState) {
 	err := newApiError(ApiErrorRun, L.Get(-1))
@@ -643,7 +650,8 @@ func (ls *LState) raiseError(level int, format string, args ...interface{}) {
 		message = fmt.Sprintf("%v %v", ls.where(level-1, true), message)
 	}
 	if ls.reg.IsFull() {
-		// if the registry is full then it won't be possible to push a value, in this case, force a larger size
+		// If the registry is full then it won't be possible to push a value, in
+		// this case, force a larger size.
 		ls.reg.forceResize(ls.reg.Top() + 1)
 	}
 	ls.reg.Push(LString(message))
@@ -1178,9 +1186,7 @@ func (ls *LState) setFieldString(obj LValue, key string, value LValue) {
 	ls.RaiseError("too many recursions in settable")
 }
 
-/* }}} */
-
-/* api methods {{{ */
+//// API methods
 
 func NewState(opts ...Options) *LState {
 	var ls *LState
@@ -1198,9 +1204,10 @@ func NewState(opts ...Options) *LState {
 			opts[0].RegistrySize = RegistrySize
 		}
 		if opts[0].RegistryMaxSize < opts[0].RegistrySize {
-			opts[0].RegistryMaxSize = 0 // disable growth if max size is smaller than initial size
+			// Disable growth if max size is smaller than initial size.
+			opts[0].RegistryMaxSize = 0
 		} else {
-			// if growth enabled, grow step is set
+			// If growth enabled, grow step is set.
 			if opts[0].RegistryGrowStep < 1 {
 				opts[0].RegistryGrowStep = RegistryGrowStep
 			}
@@ -1220,7 +1227,7 @@ func (ls *LState) IsClosed() bool {
 func (ls *LState) Close() {
 	atomic.AddInt32(&ls.stop, 1)
 	for _, file := range ls.G.tempFiles {
-		// ignore errors in these operations
+		// Ignore errors in these operations.
 		file.Close()
 		os.Remove(file.Name())
 	}
@@ -1228,7 +1235,7 @@ func (ls *LState) Close() {
 	ls.stack = nil
 }
 
-/* registry operations {{{ */
+//// Registry operations
 
 func (ls *LState) GetTop() int {
 	return ls.reg.Top() - ls.currentLocalBase()
@@ -1374,9 +1381,7 @@ func (ls *LState) Remove(index int) {
 	ls.reg.SetTop(top - 1)
 }
 
-/* }}} */
-
-/* object allocation {{{ */
+//// Object allocation
 
 func (ls *LState) NewTable() *LTable {
 	return newLTable(defaultArrayCap, defaultHashCap)
@@ -1386,8 +1391,11 @@ func (ls *LState) CreateTable(acap, hcap int) *LTable {
 	return newLTable(acap, hcap)
 }
 
-// NewThread returns a new LState that shares with the original state all global objects.
-// If the original state has context.Context, the new state has a new child context of the original state and this function returns its cancel function.
+// NewThread returns a new LState that shares with the original state all global
+// objects.
+//
+// If the original state has context.Context, the new state has a new child
+// context of the original state and this function returns its cancel function.
 func (ls *LState) NewThread() (*LState, context.CancelFunc) {
 	thread := newLState(ls.Options)
 	thread.G = ls.G
@@ -1425,9 +1433,7 @@ func (ls *LState) NewClosure(fn LGFunction, upvalues ...LValue) *LFunction {
 	return cl
 }
 
-/* }}} */
-
-/* toType {{{ */
+//// toType
 
 func (ls *LState) ToBool(n int) bool {
 	return LVAsBool(ls.Get(n))
@@ -1493,20 +1499,20 @@ func (ls *LState) ToThread(n int) *LState {
 	return nil
 }
 
-/* }}} */
-
-/* error & debug operations {{{ */
+//// Error & debug operations
 
 func (ls *LState) registryOverflow() {
 	ls.RaiseError("registry overflow")
 }
 
-// This function is equivalent to luaL_error( http://www.lua.org/manual/5.1/manual.html#luaL_error ).
+// This function is equivalent to luaL_error
+// (http://www.lua.org/manual/5.1/manual.html#luaL_error).
 func (ls *LState) RaiseError(format string, args ...interface{}) {
 	ls.raiseError(1, format, args...)
 }
 
-// This function is equivalent to lua_error( http://www.lua.org/manual/5.1/manual.html#lua_error ).
+// This function is equivalent to lua_error
+// (http://www.lua.org/manual/5.1/manual.html#lua_error).
 func (ls *LState) Error(lv LValue, level int) {
 	if str, ok := lv.(LString); ok {
 		ls.raiseError(level, string(str))
@@ -1635,9 +1641,7 @@ func (ls *LState) SetUpvalue(fn *LFunction, no int, lv LValue) string {
 	return ""
 }
 
-/* }}} */
-
-/* env operations {{{ */
+//// Env operations
 
 func (ls *LState) GetFEnv(obj LValue) LValue {
 	switch lv := obj.(type) {
@@ -1668,9 +1672,7 @@ func (ls *LState) SetFEnv(obj LValue, env LValue) {
 	/* do nothing */
 }
 
-/* }}} */
-
-/* table operations {{{ */
+//// Table operations
 
 func (ls *LState) RawGet(tb *LTable, key LValue) LValue {
 	return tb.RawGet(key)
@@ -1725,9 +1727,7 @@ func (ls *LState) Next(tb *LTable, key LValue) (LValue, LValue) {
 	return tb.Next(key)
 }
 
-/* }}} */
-
-/* unary operations {{{ */
+//// Unary operations
 
 func (ls *LState) ObjLen(v1 LValue) int {
 	if v1.Type() == LTString {
@@ -1748,9 +1748,7 @@ func (ls *LState) ObjLen(v1 LValue) int {
 	return 0
 }
 
-/* }}} */
-
-/* binary operations {{{ */
+//// Binary operations
 
 func (ls *LState) Concat(values ...LValue) string {
 	top := ls.reg.Top()
@@ -1774,17 +1772,13 @@ func (ls *LState) RawEqual(lhs, rhs LValue) bool {
 	return equals(ls, lhs, rhs, true)
 }
 
-/* }}} */
-
-/* register operations {{{ */
+//// Register operations
 
 func (ls *LState) Register(name string, fn LGFunction) {
 	ls.SetGlobal(name, ls.NewFunction(fn))
 }
 
-/* }}} */
-
-/* load and function call operations {{{ */
+//// Load and function call operations
 
 func (ls *LState) Load(reader io.Reader, name string) (*LFunction, error) {
 	chunk, err := parse.Parse(reader, name)
@@ -1886,9 +1880,7 @@ func (ls *LState) CallByParam(cp P, args ...LValue) error {
 	return nil
 }
 
-/* }}} */
-
-/* metatable operations {{{ */
+//// Metatable operations
 
 func (ls *LState) GetMetatable(obj LValue) LValue {
 	return ls.metatable(obj, false)
@@ -1911,9 +1903,7 @@ func (ls *LState) SetMetatable(obj LValue, mt LValue) {
 	}
 }
 
-/* }}} */
-
-/* coroutine operations {{{ */
+//// Coroutine operations
 
 func (ls *LState) Status(th *LState) string {
 	status := "suspended"
@@ -2007,17 +1997,16 @@ func (ls *LState) XMoveTo(other *LState, n int) {
 	ls.SetTop(top - n)
 }
 
-/* }}} */
+//// GopherLua original APIs
 
-/* GopherLua original APIs {{{ */
-
-// Set maximum memory size. This function can only be called from the main thread.
+// Set maximum memory size. This function can only be called from the main
+// thread.
 func (ls *LState) SetMx(mx int) {
 	if ls.Parent != nil {
 		ls.RaiseError("sub threads are not allowed to set a memory limit")
 	}
 	go func() {
-		limit := uint64(mx * 1024 * 1024) //MB
+		limit := uint64(mx * 1024 * 1024) // MB.
 		var s runtime.MemStats
 		for atomic.LoadInt32(&ls.stop) == 0 {
 			runtime.ReadMemStats(&s)
@@ -2030,7 +2019,8 @@ func (ls *LState) SetMx(mx int) {
 	}()
 }
 
-// SetContext set a context ctx to this LState. The provided ctx must be non-nil.
+// SetContext set a context ctx to this LState. The provided ctx must be
+// non-nil.
 func (ls *LState) SetContext(ctx context.Context) {
 	ls.mainLoop = mainLoopWithContext
 	ls.ctx = ctx
@@ -2041,7 +2031,8 @@ func (ls *LState) Context() context.Context {
 	return ls.ctx
 }
 
-// RemoveContext removes the context associated with this LState and returns this context.
+// RemoveContext removes the context associated with this LState and returns
+// this context.
 func (ls *LState) RemoveContext() context.Context {
 	oldctx := ls.ctx
 	ls.mainLoop = mainLoop
@@ -2057,8 +2048,8 @@ func (ls *LState) ToChannel(n int) chan LValue {
 	return nil
 }
 
-// RemoveCallerFrame removes the stack frame above the current stack frame. This is useful in tail calls. It returns
-// the new current frame.
+// RemoveCallerFrame removes the stack frame above the current stack frame. This
+// is useful in tail calls. It returns the new current frame.
 func (ls *LState) RemoveCallerFrame() *callFrame {
 	cs := ls.stack
 	sp := cs.Sp()
@@ -2071,9 +2062,3 @@ func (ls *LState) RemoveCallerFrame() *callFrame {
 	cs.Pop()
 	return parentFrame
 }
-
-/* }}} */
-
-/* }}} */
-
-//

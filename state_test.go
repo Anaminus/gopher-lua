@@ -19,7 +19,8 @@ func TestCallStackOverflowWhenFixed(t *testing.T) {
 	})
 	defer L.Close()
 
-	// expect fixed stack implementation by default (for backwards compatibility)
+	// Expect fixed stack implementation by default (for backwards
+	// compatibility).
 	stack := L.stack
 	if _, ok := stack.(*fixedCallFrameStack); !ok {
 		t.Errorf("expected fixed callframe stack by default")
@@ -46,7 +47,7 @@ func TestCallStackOverflowWhenAutoGrow(t *testing.T) {
 	})
 	defer L.Close()
 
-	// expect auto growing stack implementation when MinimizeStackMemory is set
+	// Expect auto growing stack implementation when MinimizeStackMemory is set.
 	stack := L.stack
 	if _, ok := stack.(*autoGrowingCallFrameStack); !ok {
 		t.Errorf("expected fixed callframe stack by default")
@@ -442,7 +443,7 @@ func TestContextWithCroutine(t *testing.T) {
 	_, err, values := L.Resume(co, fn)
 	errorIfNotNil(t, err)
 	errorIfNotEqual(t, LNumber(0), values[0])
-	// cancel the parent context
+	// Cancel the parent context.
 	cancel()
 	_, err, values = L.Resume(co, fn)
 	errorIfNil(t, err)
@@ -475,9 +476,9 @@ func TestRegistryFixedOverflow(t *testing.T) {
 	defer state.Close()
 	reg := state.reg
 	expectedPanic := false
-	// should be non auto grow by default
+	// Should be non auto grow by default.
 	errorIfFalse(t, reg.maxSize == 0, "state should default to non-auto growing implementation")
-	// fill the stack and check we get a panic
+	// Fill the stack and check we get a panic.
 	test := LString("test")
 	for i := 0; i < len(reg.array); i++ {
 		reg.Push(test)
@@ -555,7 +556,8 @@ func BenchmarkCallFrameStackPushPopFixed(t *testing.B) {
 	}
 }
 
-// this test will intentionally not incur stack growth in order to bench the performance when no allocations happen
+// This test will intentionally not incur stack growth in order to bench the
+// performance when no allocations happen.
 func BenchmarkCallFrameStackPushPopShallowAutoGrow(t *testing.B) {
 	stack := newAutoGrowingCallFrameStack(256)
 
@@ -652,7 +654,7 @@ func (registryTestHandler) registryOverflow() {
 	panic("registry overflow")
 }
 
-// test pushing and popping from the registry
+// Test pushing and popping from the registry.
 func BenchmarkRegistryPushPopAutoGrow(t *testing.B) {
 	al := newAllocator(32)
 	sz := 256 * 20

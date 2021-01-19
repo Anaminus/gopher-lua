@@ -23,7 +23,7 @@ func getIntField(L *LState, tb *LTable, key string, v int) int {
 		slv := string(lv)
 		slv = strings.TrimLeft(slv, " ")
 		if strings.HasPrefix(slv, "0") && !strings.HasPrefix(slv, "0x") && !strings.HasPrefix(slv, "0X") {
-			//Standard lua interpreter only support decimal and hexadecimal
+			// Standard lua interpreter only support decimal and hexadecimal.
 			slv = strings.TrimLeft(slv, "0")
 		}
 		if num, err := parseNumber(slv); err == nil {
@@ -122,7 +122,7 @@ func osDate(L *LState) int {
 			ret.RawSetString("min", LNumber(t.Minute()))
 			ret.RawSetString("sec", LNumber(t.Second()))
 			ret.RawSetString("wday", LNumber(t.Weekday()+1))
-			// TODO yday & dst
+			//TODO: yday & dst
 			ret.RawSetString("yday", LNumber(0))
 			ret.RawSetString("isdst", LFalse)
 			L.Push(ret)
@@ -168,7 +168,7 @@ func osRename(L *LState) int {
 }
 
 func osSetLocale(L *LState) int {
-	// setlocale is not supported
+	// setlocale is not supported.
 	L.Push(LFalse)
 	return 1
 }
@@ -198,7 +198,7 @@ func osTime(L *LState) int {
 		year := getIntField(L, tbl, "year", -1)
 		isdst := getBoolField(L, tbl, "isdst", false)
 		t := time.Date(year, time.Month(month), day, hour, min, sec, 0, time.Local)
-		// TODO dst
+		//TODO: dst
 		if false {
 			print(isdst)
 		}
@@ -213,9 +213,7 @@ func osTmpname(L *LState) int {
 		L.RaiseError("unable to generate a unique filename")
 	}
 	file.Close()
-	os.Remove(file.Name()) // ignore errors
+	os.Remove(file.Name()) // Ignore errors.
 	L.Push(LString(file.Name()))
 	return 1
 }
-
-//

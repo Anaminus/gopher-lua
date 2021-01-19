@@ -1,4 +1,4 @@
-// Lua pattern match functions for Go
+// Lua pattern match functions for Go.
 package pm
 
 import (
@@ -8,7 +8,7 @@ import (
 const EOS = -1
 const _UNKNOWN = -2
 
-/* Error {{{ */
+//// Error
 
 type Error struct {
 	Pos     int
@@ -33,13 +33,11 @@ func (e *Error) Error() string {
 	}
 }
 
-/* }}} */
-
-/* MatchData {{{ */
+//// MatchData
 
 type MatchData struct {
-	// captured positions
-	// layout
+	// Captured positions layout:
+	//
 	// xxxx xxxx xxxx xxx0 : caputured positions
 	// xxxx xxxx xxxx xxx1 : position captured positions
 	captures []uint32
@@ -72,9 +70,7 @@ func (st *MatchData) IsPosCapture(idx int) bool { return (st.captures[idx] & 1) 
 
 func (st *MatchData) Capture(idx int) int { return int(st.captures[idx] >> 1) }
 
-/* }}} */
-
-/* scanner {{{ */
+//// scanner
 
 type scannerState struct {
 	Pos     int
@@ -151,9 +147,7 @@ func (sc *scanner) Save() { sc.saved = sc.State }
 
 func (sc *scanner) Restore() { sc.State = sc.saved }
 
-/* }}} */
-
-/* bytecode {{{ */
+//// Bytecode
 
 type opCode int
 
@@ -176,9 +170,7 @@ type inst struct {
 	Operand2 int
 }
 
-/* }}} */
-
-/* classes {{{ */
+//// Classes
 
 type class interface {
 	Matches(ch int) bool
@@ -264,9 +256,7 @@ func (pn *rangeClass) Matches(ch int) bool {
 	return false
 }
 
-// }}}
-
-// patterns {{{
+//// Patterns
 
 type pattern interface{}
 
@@ -300,9 +290,7 @@ type bracePattern struct {
 	End   int
 }
 
-// }}}
-
-/* parse {{{ */
+//// Parse
 
 func parseClass(sc *scanner, allowset bool) class {
 	ch := sc.Next()
@@ -518,12 +506,10 @@ func compilePattern(p pattern, ps ...*iptr) []inst {
 	return ptr.insts
 }
 
-/* }}} parse */
+//// VM
 
-/* VM {{{ */
-
-// Simple recursive virtual machine based on the
-// "Regular Expression Matching: the Virtual Machine Approach" (https://swtch.com/~rsc/regexp/regexp2.html)
+// Simple recursive virtual machine based on the "Regular Expression Matching:
+// the Virtual Machine Approach" (https://swtch.com/~rsc/regexp/regexp2.html).
 func recursiveVM(src []byte, insts []inst, pc, sp int, ms ...*MatchData) (bool, int, *MatchData) {
 	var m *MatchData
 	if len(ms) == 0 {
@@ -602,9 +588,7 @@ redo:
 	panic("should not reach here")
 }
 
-/* }}} */
-
-/* API {{{ */
+//// API
 
 func Find(p string, src []byte, offset, limit int) (matches []*MatchData, err error) {
 	defer func() {
@@ -634,5 +618,3 @@ func Find(p string, src []byte, offset, limit int) (matches []*MatchData, err er
 	}
 	return
 }
-
-/* }}} */

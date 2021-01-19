@@ -1,4 +1,4 @@
-// GopherLua: VM and compiler for Lua in Go
+// GopherLua: VM and compiler for Lua in Go.
 package lua
 
 const PackageName = "GopherLua"

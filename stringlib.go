@@ -248,7 +248,7 @@ func strGsubTable(L *LState, str string, repl *LTable, matches []*pm.MatchData) 
 	infoList := make([]replaceInfo, 0, len(matches))
 	for _, match := range matches {
 		idx := 0
-		if match.CaptureLength() > 2 { // has captures
+		if match.CaptureLength() > 2 { // Has captures.
 			idx = 2
 		}
 		var value LValue
@@ -270,7 +270,7 @@ func strGsubFunc(L *LState, str string, repl *LFunction, matches []*pm.MatchData
 		start, end := match.Capture(0), match.Capture(1)
 		L.Push(repl)
 		nargs := 0
-		if match.CaptureLength() > 2 { // has captures
+		if match.CaptureLength() > 2 { // Has captures.
 			for i := 2; i < match.CaptureLength(); i += 2 {
 				if match.IsPosCapture(i) {
 					L.Push(LNumber(match.Capture(i)))
@@ -444,5 +444,3 @@ func luaIndex2StringIndex(str string, i int, start bool) int {
 	}
 	return i
 }
-
-//

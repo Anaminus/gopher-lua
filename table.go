@@ -128,7 +128,7 @@ func (tb *LTable) Remove(pos int) LValue {
 	oldval := LNil
 	switch {
 	case i >= larray:
-		// nothing to do
+		// Nothing to do.
 	case i == larray-1 || i < 0:
 		oldval = tb.array[larray-1]
 		tb.array = tb.array[:larray-1]
@@ -141,9 +141,9 @@ func (tb *LTable) Remove(pos int) LValue {
 	return oldval
 }
 
-// RawSet sets a given LValue to a given index without the __newindex metamethod.
-// It is recommended to use `RawSetString` or `RawSetInt` for performance
-// if you already know the given LValue is a string or number.
+// RawSet sets a given LValue to a given index without the __newindex
+// metamethod. It is recommended to use `RawSetString` or `RawSetInt` for
+// performance if you already know the given LValue is a string or number.
 func (tb *LTable) RawSet(key LValue, value LValue) {
 	switch v := key.(type) {
 	case LNumber:
@@ -174,7 +174,8 @@ func (tb *LTable) RawSet(key LValue, value LValue) {
 	tb.RawSetH(key, value)
 }
 
-// RawSetInt sets a given LValue at a position `key` without the __newindex metamethod.
+// RawSetInt sets a given LValue at a position `key` without the __newindex
+// metamethod.
 func (tb *LTable) RawSetInt(key int, value LValue) {
 	if key < 1 || key >= MaxArrayIndex {
 		tb.RawSetH(LNumber(key), value)
@@ -198,7 +199,8 @@ func (tb *LTable) RawSetInt(key int, value LValue) {
 	}
 }
 
-// RawSetString sets a given LValue to a given string index without the __newindex metamethod.
+// RawSetString sets a given LValue to a given string index without the
+// __newindex metamethod.
 func (tb *LTable) RawSetString(key string, value LValue) {
 	if tb.strdict == nil {
 		tb.strdict = make(map[string]LValue, defaultHashCap)
@@ -209,7 +211,7 @@ func (tb *LTable) RawSetString(key string, value LValue) {
 	}
 
 	if value == LNil {
-		// TODO tb.keys and tb.k2i should also be removed
+		//TODO: tb.keys and tb.k2i should also be removed.
 		delete(tb.strdict, key)
 	} else {
 		tb.strdict[key] = value
@@ -221,7 +223,8 @@ func (tb *LTable) RawSetString(key string, value LValue) {
 	}
 }
 
-// RawSetH sets a given LValue to a given index without the __newindex metamethod.
+// RawSetH sets a given LValue to a given index without the __newindex
+// metamethod.
 func (tb *LTable) RawSetH(key LValue, value LValue) {
 	if s, ok := key.(LString); ok {
 		tb.RawSetString(string(s), value)
@@ -236,7 +239,7 @@ func (tb *LTable) RawSetH(key LValue, value LValue) {
 	}
 
 	if value == LNil {
-		// TODO tb.keys and tb.k2i should also be removed
+		//TODO: tb.keys and tb.k2i should also be removed.
 		delete(tb.dict, key)
 	} else {
 		tb.dict[key] = value
@@ -247,7 +250,8 @@ func (tb *LTable) RawSetH(key LValue, value LValue) {
 	}
 }
 
-// RawGet returns an LValue associated with a given key without __index metamethod.
+// RawGet returns an LValue associated with a given key without __index
+// metamethod.
 func (tb *LTable) RawGet(key LValue) LValue {
 	switch v := key.(type) {
 	case LNumber:
@@ -291,7 +295,8 @@ func (tb *LTable) RawGetInt(key int) LValue {
 	return tb.array[index]
 }
 
-// RawGet returns an LValue associated with a given key without __index metamethod.
+// RawGet returns an LValue associated with a given key without __index
+// metamethod.
 func (tb *LTable) RawGetH(key LValue) LValue {
 	if s, sok := key.(LString); sok {
 		if tb.strdict == nil {
@@ -311,7 +316,8 @@ func (tb *LTable) RawGetH(key LValue) LValue {
 	return LNil
 }
 
-// RawGetString returns an LValue associated with a given key without __index metamethod.
+// RawGetString returns an LValue associated with a given key without __index
+// metamethod.
 func (tb *LTable) RawGetString(key string) LValue {
 	if tb.strdict == nil {
 		return LNil
@@ -322,7 +328,8 @@ func (tb *LTable) RawGetString(key string) LValue {
 	return LNil
 }
 
-// ForEach iterates over this table of elements, yielding each in turn to a given function.
+// ForEach iterates over this table of elements, yielding each in turn to a
+// given function.
 func (tb *LTable) ForEach(cb func(LValue, LValue)) {
 	if tb.array != nil {
 		for i, v := range tb.array {
@@ -347,7 +354,8 @@ func (tb *LTable) ForEach(cb func(LValue, LValue)) {
 	}
 }
 
-// This function is equivalent to lua_next ( http://www.lua.org/manual/5.1/manual.html#lua_next ).
+// This function is equivalent to lua_next
+// (http://www.lua.org/manual/5.1/manual.html#lua_next).
 func (tb *LTable) Next(key LValue) (LValue, LValue) {
 	init := false
 	if key == LNil {

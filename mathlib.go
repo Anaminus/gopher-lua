@@ -227,5 +227,3 @@ func mathTanh(L *LState) int {
 	L.Push(LNumber(math.Tanh(float64(L.CheckNumber(1)))))
 	return 1
 }
-
-//

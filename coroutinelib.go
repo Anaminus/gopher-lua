@@ -1,7 +1,7 @@
 package lua
 
 func OpenCoroutine(L *LState) int {
-	// TODO: Tie module name to contents of linit.go?
+	//TODO: Tie module name to contents of linit.go?
 	mod := L.RegisterModule(CoroutineLibName, coFuncs)
 	L.Push(mod)
 	return 1
@@ -108,5 +108,3 @@ func coWrap(L *LState) int {
 	L.Push(L.NewClosure(wrapaux, v))
 	return 1
 }
-
-//

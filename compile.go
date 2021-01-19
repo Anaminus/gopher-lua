@@ -7,7 +7,7 @@ import (
 	"reflect"
 )
 
-/* internal constants & structs  {{{ */
+//// Internal constants & structs
 
 const maxRegisters = 200
 
@@ -56,9 +56,8 @@ type constLValueExpr struct {
 	Value LValue
 }
 
-// }}}
+//// Utilities
 
-/* utilities {{{ */
 var _ecnone0 = &expcontext{ecNone, regNotDefined, 0}
 var _ecnonem1 = &expcontext{ecNone, regNotDefined, -1}
 var _ecnonem2 = &expcontext{ecNone, regNotDefined, -2}
@@ -132,9 +131,7 @@ func lnumberValue(expr ast.Expr) (LNumber, bool) {
 	return 0, false
 }
 
-/* utilities }}} */
-
-type CompileError struct { // {{{
+type CompileError struct {
 	context *funcContext
 	Line    int
 	Message string
@@ -142,9 +139,9 @@ type CompileError struct { // {{{
 
 func (e *CompileError) Error() string {
 	return fmt.Sprintf("compile error near line(%v) %v: %v", e.Line, e.context.Proto.SourceName, e.Message)
-} // }}}
+}
 
-type codeStore struct { // {{{
+type codeStore struct {
 	codes []uint32
 	lines []int
 	pc    int
@@ -266,9 +263,9 @@ func (cd *codeStore) Last() uint32 {
 
 func (cd *codeStore) Pop() {
 	cd.pc--
-} /* }}} Code */
+}
 
-/* {{{ VarNamePool */
+//// VarNamePool
 
 type varNamePoolValue struct {
 	Index int
@@ -323,9 +320,7 @@ func (vp *varNamePool) Register(name string) int {
 	return len(vp.names) - 1 + vp.offset
 }
 
-/* }}} VarNamePool */
-
-/* FuncContext {{{ */
+//// FuncContext
 
 type codeBlock struct {
 	LocalVars  *varNamePool
@@ -469,15 +464,13 @@ func (fc *funcContext) RegTop() int {
 	return fc.regTop
 }
 
-/* FuncContext }}} */
-
-func compileChunk(context *funcContext, chunk []ast.Stmt) { // {{{
+func compileChunk(context *funcContext, chunk []ast.Stmt) {
 	for _, stmt := range chunk {
 		compileStmt(context, stmt)
 	}
-} // }}}
+}
 
-func compileBlock(context *funcContext, chunk []ast.Stmt) { // {{{
+func compileBlock(context *funcContext, chunk []ast.Stmt) {
 	if len(chunk) == 0 {
 		return
 	}
@@ -489,9 +482,9 @@ func compileBlock(context *funcContext, chunk []ast.Stmt) { // {{{
 		compileStmt(context, stmt)
 	}
 	context.LeaveBlock()
-} // }}}
+}
 
-func compileStmt(context *funcContext, stmt ast.Stmt) { // {{{
+func compileStmt(context *funcContext, stmt ast.Stmt) {
 	switch st := stmt.(type) {
 	case *ast.AssignStmt:
 		compileAssignStmt(context, st)
@@ -520,9 +513,9 @@ func compileStmt(context *funcContext, stmt ast.Stmt) { // {{{
 	case *ast.GenericForStmt:
 		compileGenericForStmt(context, st)
 	}
-} // }}}
+}
 
-func compileAssignStmtLeft(context *funcContext, stmt *ast.AssignStmt) (int, []*assigncontext) { // {{{
+func compileAssignStmtLeft(context *funcContext, stmt *ast.AssignStmt) (int, []*assigncontext) {
 	reg := context.RegTop()
 	acs := make([]*assigncontext, 0, len(stmt.Lhs))
 	for i, lhs := range stmt.Lhs {
@@ -557,9 +550,9 @@ func compileAssignStmtLeft(context *funcContext, stmt *ast.AssignStmt) (int, []*
 		}
 	}
 	return reg, acs
-} // }}}
+}
 
-func compileAssignStmtRight(context *funcContext, stmt *ast.AssignStmt, reg int, acs []*assigncontext) (int, []*assigncontext) { // {{{
+func compileAssignStmtRight(context *funcContext, stmt *ast.AssignStmt, reg int, acs []*assigncontext) (int, []*assigncontext) {
 	lennames := len(stmt.Lhs)
 	lenexprs := len(stmt.Rhs)
 	namesassigned := 0
@@ -608,7 +601,7 @@ func compileAssignStmtRight(context *funcContext, stmt *ast.AssignStmt, reg int,
 
 	rightreg := reg - 1
 
-	// extra right exprs
+	// Extra right exprs.
 	for i := namesassigned; i < lenexprs; i++ {
 		varargopt := -1
 		if i != lenexprs-1 {
@@ -617,9 +610,9 @@ func compileAssignStmtRight(context *funcContext, stmt *ast.AssignStmt, reg int,
 		reg += compileExpr(context, reg, stmt.Rhs[i], ecnone(varargopt))
 	}
 	return rightreg, acs
-} // }}}
+}
 
-func compileAssignStmt(context *funcContext, stmt *ast.AssignStmt) { // {{{
+func compileAssignStmt(context *funcContext, stmt *ast.AssignStmt) {
 	code := context.Code
 	lennames := len(stmt.Lhs)
 	reg, acs := compileAssignStmtLeft(context, stmt)
@@ -650,9 +643,9 @@ func compileAssignStmt(context *funcContext, stmt *ast.AssignStmt) { // {{{
 			}
 		}
 	}
-} // }}}
+}
 
-func compileRegAssignment(context *funcContext, names []string, exprs []ast.Expr, reg int, nvars int, line int) { // {{{
+func compileRegAssignment(context *funcContext, names []string, exprs []ast.Expr, reg int, nvars int, line int) {
 	lennames := len(names)
 	lenexprs := len(exprs)
 	namesassigned := 0
@@ -674,14 +667,14 @@ func compileRegAssignment(context *funcContext, names []string, exprs []ast.Expr
 		}
 	}
 
-	// extra left names
+	// Extra left names.
 	if lennames > namesassigned {
 		restleft := lennames - namesassigned - 1
 		context.Code.AddLoadNil(reg, reg+restleft, line)
 		reg += restleft
 	}
 
-	// extra right exprs
+	// Extra right exprs.
 	for i := namesassigned; i < lenexprs; i++ {
 		varargopt := -1
 		if i != lenexprs-1 {
@@ -690,9 +683,9 @@ func compileRegAssignment(context *funcContext, names []string, exprs []ast.Expr
 		ecupdate(ec, ecNone, reg, varargopt)
 		reg += compileExpr(context, reg, exprs[i], ec)
 	}
-} // }}}
+}
 
-func compileLocalAssignStmt(context *funcContext, stmt *ast.LocalAssignStmt) { // {{{
+func compileLocalAssignStmt(context *funcContext, stmt *ast.LocalAssignStmt) {
 	reg := context.RegTop()
 	if len(stmt.Names) == 1 && len(stmt.Exprs) == 1 {
 		if _, ok := stmt.Exprs[0].(*ast.FunctionExpr); ok {
@@ -706,9 +699,9 @@ func compileLocalAssignStmt(context *funcContext, stmt *ast.LocalAssignStmt) { /
 	for _, name := range stmt.Names {
 		context.RegisterLocalVar(name)
 	}
-} // }}}
+}
 
-func compileReturnStmt(context *funcContext, stmt *ast.ReturnStmt) { // {{{
+func compileReturnStmt(context *funcContext, stmt *ast.ReturnStmt) {
 	lenexprs := len(stmt.Exprs)
 	code := context.Code
 	reg := context.RegTop()
@@ -743,9 +736,9 @@ func compileReturnStmt(context *funcContext, stmt *ast.ReturnStmt) { // {{{
 		count = 0
 	}
 	context.Code.AddABC(OP_RETURN, a, count, 0, sline(stmt))
-} // }}}
+}
 
-func compileIfStmt(context *funcContext, stmt *ast.IfStmt) { // {{{
+func compileIfStmt(context *funcContext, stmt *ast.IfStmt) {
 	thenlabel := context.NewLabel()
 	elselabel := context.NewLabel()
 	endlabel := context.NewLabel()
@@ -762,10 +755,10 @@ func compileIfStmt(context *funcContext, stmt *ast.IfStmt) { // {{{
 		context.SetLabelPc(endlabel, context.Code.LastPC())
 	}
 
-} // }}}
+}
 
-func compileBranchCondition(context *funcContext, reg int, expr ast.Expr, thenlabel, elselabel int, hasnextcond bool) { // {{{
-	// TODO folding constants?
+func compileBranchCondition(context *funcContext, reg int, expr ast.Expr, thenlabel, elselabel int, hasnextcond bool) {
+	//TODO: Folding constants?
 	code := context.Code
 	flip := 0
 	jumplabel := elselabel
@@ -810,9 +803,9 @@ func compileBranchCondition(context *funcContext, reg int, expr ast.Expr, thenla
 	compileExprWithMVPropagation(context, expr, &reg, &a)
 	code.AddABC(OP_TEST, a, 0, 0^flip, sline(expr))
 	code.AddASbx(OP_JMP, 0, jumplabel, sline(expr))
-} // }}}
+}
 
-func compileWhileStmt(context *funcContext, stmt *ast.WhileStmt) { // {{{
+func compileWhileStmt(context *funcContext, stmt *ast.WhileStmt) {
 	thenlabel := context.NewLabel()
 	elselabel := context.NewLabel()
 	condlabel := context.NewLabel()
@@ -826,9 +819,9 @@ func compileWhileStmt(context *funcContext, stmt *ast.WhileStmt) { // {{{
 	context.Code.AddASbx(OP_JMP, 0, condlabel, eline(stmt))
 	context.LeaveBlock()
 	context.SetLabelPc(elselabel, context.Code.LastPC())
-} // }}}
+}
 
-func compileRepeatStmt(context *funcContext, stmt *ast.RepeatStmt) { // {{{
+func compileRepeatStmt(context *funcContext, stmt *ast.RepeatStmt) {
 	initlabel := context.NewLabel()
 	thenlabel := context.NewLabel()
 	elselabel := context.NewLabel()
@@ -851,9 +844,9 @@ func compileRepeatStmt(context *funcContext, stmt *ast.RepeatStmt) { // {{{
 		context.SetLabelPc(label, context.Code.LastPC())
 	}
 
-} // }}}
+}
 
-func compileBreakStmt(context *funcContext, stmt *ast.BreakStmt) { // {{{
+func compileBreakStmt(context *funcContext, stmt *ast.BreakStmt) {
 	for block := context.Block; block != nil; block = block.Parent {
 		if label := block.BreakLabel; label != labelNoJump {
 			if block.RefUpvalue {
@@ -864,9 +857,9 @@ func compileBreakStmt(context *funcContext, stmt *ast.BreakStmt) { // {{{
 		}
 	}
 	raiseCompileError(context, sline(stmt), "no loop to break")
-} // }}}
+}
 
-func compileFuncDefStmt(context *funcContext, stmt *ast.FuncDefStmt) { // {{{
+func compileFuncDefStmt(context *funcContext, stmt *ast.FuncDefStmt) {
 	if stmt.Name.Func == nil {
 		reg := context.RegTop()
 		var treg, kreg int
@@ -880,9 +873,9 @@ func compileFuncDefStmt(context *funcContext, stmt *ast.FuncDefStmt) { // {{{
 		astmt.SetLastLine(eline(stmt.Func))
 		compileAssignStmt(context, astmt)
 	}
-} // }}}
+}
 
-func compileNumberForStmt(context *funcContext, stmt *ast.NumberForStmt) { // {{{
+func compileNumberForStmt(context *funcContext, stmt *ast.NumberForStmt) {
 	code := context.Code
 	endlabel := context.NewLabel()
 	ec := &expcontext{}
@@ -922,9 +915,9 @@ func compileNumberForStmt(context *funcContext, stmt *ast.NumberForStmt) { // {{
 	context.SetLabelPc(endlabel, code.LastPC())
 	code.SetSbx(bodypc, flpc-bodypc)
 
-} // }}}
+}
 
-func compileGenericForStmt(context *funcContext, stmt *ast.GenericForStmt) { // {{{
+func compileGenericForStmt(context *funcContext, stmt *ast.GenericForStmt) {
 	code := context.Code
 	endlabel := context.NewLabel()
 	bodylabel := context.NewLabel()
@@ -954,9 +947,9 @@ func compileGenericForStmt(context *funcContext, stmt *ast.GenericForStmt) { // 
 	code.AddASbx(OP_JMP, 0, bodylabel, sline(stmt))
 
 	context.SetLabelPc(endlabel, code.LastPC())
-} // }}}
+}
 
-func compileExpr(context *funcContext, reg int, expr ast.Expr, ec *expcontext) int { // {{{
+func compileExpr(context *funcContext, reg int, expr ast.Expr, ec *expcontext) int {
 	code := context.Code
 	sreg := savereg(ec, reg)
 	sused := 1
@@ -1064,9 +1057,9 @@ func compileExpr(context *funcContext, reg int, expr ast.Expr, ec *expcontext) i
 		panic(fmt.Sprintf("expr %v not implemented.", reflect.TypeOf(ex).Elem().Name()))
 	}
 
-} // }}}
+}
 
-func compileExprWithPropagation(context *funcContext, expr ast.Expr, reg *int, save *int, propergator func(int, *int, *int, int)) { // {{{
+func compileExprWithPropagation(context *funcContext, expr ast.Expr, reg *int, save *int, propergator func(int, *int, *int, int)) {
 	reginc := compileExpr(context, *reg, expr, ecnone(0))
 	if _, ok := expr.(*ast.LogicalOpExpr); ok {
 		*save = *reg
@@ -1074,17 +1067,17 @@ func compileExprWithPropagation(context *funcContext, expr ast.Expr, reg *int, s
 	} else {
 		propergator(context.RegTop(), save, reg, reginc)
 	}
-} // }}}
+}
 
-func compileExprWithKMVPropagation(context *funcContext, expr ast.Expr, reg *int, save *int) { // {{{
+func compileExprWithKMVPropagation(context *funcContext, expr ast.Expr, reg *int, save *int) {
 	compileExprWithPropagation(context, expr, reg, save, context.Code.PropagateKMV)
-} // }}}
+}
 
-func compileExprWithMVPropagation(context *funcContext, expr ast.Expr, reg *int, save *int) { // {{{
+func compileExprWithMVPropagation(context *funcContext, expr ast.Expr, reg *int, save *int) {
 	compileExprWithPropagation(context, expr, reg, save, context.Code.PropagateMV)
-} // }}}
+}
 
-func constFold(exp ast.Expr) ast.Expr { // {{{
+func constFold(exp ast.Expr) ast.Expr {
 	switch expr := exp.(type) {
 	case *ast.ArithmeticOpExpr:
 		lvalue, lisconst := lnumberValue(constFold(expr.Lhs))
@@ -1119,9 +1112,9 @@ func constFold(exp ast.Expr) ast.Expr { // {{{
 
 		return exp
 	}
-} // }}}
+}
 
-func compileFunctionExpr(context *funcContext, funcexpr *ast.FunctionExpr, ec *expcontext) { // {{{
+func compileFunctionExpr(context *funcContext, funcexpr *ast.FunctionExpr, ec *expcontext) {
 	context.Proto.LineDefined = sline(funcexpr)
 	context.Proto.LastLineDefined = eline(funcexpr)
 	if len(funcexpr.ParList.Names) > maxRegisters {
@@ -1161,9 +1154,9 @@ func compileFunctionExpr(context *funcContext, funcexpr *ast.FunctionExpr, ec *e
 		context.Proto.stringConstants = append(context.Proto.stringConstants, sv)
 	}
 	patchCode(context)
-} // }}}
+}
 
-func compileTableExpr(context *funcContext, reg int, ex *ast.TableExpr, ec *expcontext) { // {{{
+func compileTableExpr(context *funcContext, reg int, ex *ast.TableExpr, ec *expcontext) {
 	code := context.Code
 	/*
 		tablereg := savereg(ec, reg)
@@ -1232,9 +1225,9 @@ func compileTableExpr(context *funcContext, reg int, ex *ast.TableExpr, ec *expc
 	if shouldmove(ec, tablereg) {
 		code.AddABC(OP_MOVE, ec.reg, tablereg, 0, sline(ex))
 	}
-} // }}}
+}
 
-func compileArithmeticOpExpr(context *funcContext, reg int, expr *ast.ArithmeticOpExpr, ec *expcontext) { // {{{
+func compileArithmeticOpExpr(context *funcContext, reg int, expr *ast.ArithmeticOpExpr, ec *expcontext) {
 	exp := constFold(expr)
 	if ex, ok := exp.(*constLValueExpr); ok {
 		exp.SetLine(sline(expr))
@@ -1264,9 +1257,9 @@ func compileArithmeticOpExpr(context *funcContext, reg int, expr *ast.Arithmetic
 		op = OP_POW
 	}
 	context.Code.AddABC(op, a, b, c, sline(expr))
-} // }}}
+}
 
-func compileStringConcatOpExpr(context *funcContext, reg int, expr *ast.StringConcatOpExpr, ec *expcontext) { // {{{
+func compileStringConcatOpExpr(context *funcContext, reg int, expr *ast.StringConcatOpExpr, ec *expcontext) {
 	code := context.Code
 	crange := 1
 	for current := expr.Rhs; current != nil; {
@@ -1285,9 +1278,9 @@ func compileStringConcatOpExpr(context *funcContext, reg int, expr *ast.StringCo
 		code.Pop()
 	}
 	code.AddABC(OP_CONCAT, a, basereg, basereg+crange, sline(expr))
-} // }}}
+}
 
-func compileUnaryOpExpr(context *funcContext, reg int, expr ast.Expr, ec *expcontext) { // {{{
+func compileUnaryOpExpr(context *funcContext, reg int, expr ast.Expr, ec *expcontext) {
 	opcode := 0
 	code := context.Code
 	var operandexpr ast.Expr
@@ -1323,9 +1316,9 @@ func compileUnaryOpExpr(context *funcContext, reg int, expr ast.Expr, ec *expcon
 	b := reg
 	compileExprWithMVPropagation(context, operandexpr, &reg, &b)
 	code.AddABC(opcode, a, b, 0, sline(expr))
-} // }}}
+}
 
-func compileRelationalOpExprAux(context *funcContext, reg int, expr *ast.RelationalOpExpr, flip int, label int) { // {{{
+func compileRelationalOpExprAux(context *funcContext, reg int, expr *ast.RelationalOpExpr, flip int, label int) {
 	code := context.Code
 	b := reg
 	compileExprWithKMVPropagation(context, expr.Lhs, &reg, &b)
@@ -1346,9 +1339,9 @@ func compileRelationalOpExprAux(context *funcContext, reg int, expr *ast.Relatio
 		code.AddABC(OP_EQ, 1^flip, b, c, sline(expr))
 	}
 	code.AddASbx(OP_JMP, 0, label, sline(expr))
-} // }}}
+}
 
-func compileRelationalOpExpr(context *funcContext, reg int, expr *ast.RelationalOpExpr, ec *expcontext) { // {{{
+func compileRelationalOpExpr(context *funcContext, reg int, expr *ast.RelationalOpExpr, ec *expcontext) {
 	a := savereg(ec, reg)
 	code := context.Code
 	jumplabel := context.NewLabel()
@@ -1356,9 +1349,9 @@ func compileRelationalOpExpr(context *funcContext, reg int, expr *ast.Relational
 	code.AddABC(OP_LOADBOOL, a, 0, 1, sline(expr))
 	context.SetLabelPc(jumplabel, code.LastPC())
 	code.AddABC(OP_LOADBOOL, a, 1, 0, sline(expr))
-} // }}}
+}
 
-func compileLogicalOpExpr(context *funcContext, reg int, expr *ast.LogicalOpExpr, ec *expcontext) { // {{{
+func compileLogicalOpExpr(context *funcContext, reg int, expr *ast.LogicalOpExpr, ec *expcontext) {
 	a := savereg(ec, reg)
 	code := context.Code
 	endlabel := context.NewLabel()
@@ -1387,9 +1380,9 @@ func compileLogicalOpExpr(context *funcContext, reg int, expr *ast.LogicalOpExpr
 	}
 
 	context.SetLabelPc(endlabel, code.LastPC())
-} // }}}
+}
 
-func compileLogicalOpExprAux(context *funcContext, reg int, expr ast.Expr, ec *expcontext, thenlabel, elselabel int, hasnextcond bool, lb *lblabels) { // {{{
+func compileLogicalOpExprAux(context *funcContext, reg int, expr ast.Expr, ec *expcontext, thenlabel, elselabel int, hasnextcond bool, lb *lblabels) {
 	// TODO folding constants?
 	code := context.Code
 	flip := 0
@@ -1481,9 +1474,9 @@ func compileLogicalOpExprAux(context *funcContext, reg int, expr ast.Expr, ec *e
 		}
 	}
 	code.AddASbx(OP_JMP, 0, jumplabel, sline(expr))
-} // }}}
+}
 
-func compileFuncCallExpr(context *funcContext, reg int, expr *ast.FuncCallExpr, ec *expcontext) int { // {{{
+func compileFuncCallExpr(context *funcContext, reg int, expr *ast.FuncCallExpr, ec *expcontext) int {
 	funcreg := reg
 	if ec.ctype == ecLocal && ec.reg == (int(context.Proto.NumParameters)-1) {
 		funcreg = ec.reg
@@ -1501,7 +1494,7 @@ func compileFuncCallExpr(context *funcContext, reg int, expr *ast.FuncCallExpr, 
 		compileExprWithMVPropagation(context, expr.Receiver, &reg, &b)
 		c := loadRk(context, &reg, expr, LString(expr.Method))
 		context.Code.AddABC(OP_SELF, funcreg, b, c, sline(expr))
-		// increments a register for an implicit "self"
+		// Increments a register for an implicit "self".
 		reg = b + 1
 		reg2 := funcreg + 2
 		if reg2 > reg {
@@ -1534,9 +1527,9 @@ func compileFuncCallExpr(context *funcContext, reg int, expr *ast.FuncCallExpr, 
 		return 0
 	}
 	return ec.varargopt + 1
-} // }}}
+}
 
-func loadRk(context *funcContext, reg *int, expr ast.Expr, cnst LValue) int { // {{{
+func loadRk(context *funcContext, reg *int, expr ast.Expr, cnst LValue) int {
 	cindex := context.ConstIndex(cnst)
 	if cindex <= opMaxIndexRk {
 		return opRkAsk(cindex)
@@ -1546,9 +1539,9 @@ func loadRk(context *funcContext, reg *int, expr ast.Expr, cnst LValue) int { //
 		context.Code.AddABx(OP_LOADK, ret, cindex, sline(expr))
 		return ret
 	}
-} // }}}
+}
 
-func getIdentRefType(context *funcContext, current *funcContext, expr *ast.IdentExpr) expContextType { // {{{
+func getIdentRefType(context *funcContext, current *funcContext, expr *ast.IdentExpr) expContextType {
 	if current == nil {
 		return ecGlobal
 	} else if current.FindLocalVar(expr.Value) > -1 {
@@ -1558,9 +1551,9 @@ func getIdentRefType(context *funcContext, current *funcContext, expr *ast.Ident
 		return ecUpvalue
 	}
 	return getIdentRefType(context, current.Parent, expr)
-} // }}}
+}
 
-func getExprName(context *funcContext, expr ast.Expr) string { // {{{
+func getExprName(context *funcContext, expr ast.Expr) string {
 	switch ex := expr.(type) {
 	case *ast.IdentExpr:
 		return ex.Value
@@ -1572,9 +1565,9 @@ func getExprName(context *funcContext, expr ast.Expr) string { // {{{
 		return "?"
 	}
 	return "?"
-} // }}}
+}
 
-func patchCode(context *funcContext) { // {{{
+func patchCode(context *funcContext) {
 	maxreg := 1
 	if np := int(context.Proto.NumParameters); np > 1 {
 		maxreg = np
@@ -1609,9 +1602,9 @@ func patchCode(context *funcContext) { // {{{
 			if reg := opGetArgB(inst); reg > maxreg {
 				maxreg = reg
 			}
-		case OP_JMP: // jump to jump optimization
+		case OP_JMP: // Jump to jump optimization.
 			distance := 0
-			count := 0 // avoiding infinite loops
+			count := 0 // Avoiding infinite loops.
 			for jmp := inst; opGetOpCode(jmp) == OP_JMP && count < 5; jmp = context.Code.At(pc + distance + 1) {
 				d := context.GetLabelPc(opGetArgSbx(jmp)) - pc
 				if d > opMaxArgSbx {
@@ -1634,7 +1627,7 @@ func patchCode(context *funcContext) { // {{{
 			}
 		}
 
-		// bulk move optimization(reducing op dipatch costs)
+		// Bulk move optimization(reducing op dipatch costs).
 		if curop == OP_MOVE {
 			moven++
 		} else {
@@ -1650,9 +1643,9 @@ func patchCode(context *funcContext) { // {{{
 		raiseCompileError(context, context.Proto.LineDefined, "register overflow(too many local variables)")
 	}
 	context.Proto.NumUsedRegisters = uint8(maxreg)
-} // }}}
+}
 
-func Compile(chunk []ast.Stmt, name string) (proto *FunctionProto, err error) { // {{{
+func Compile(chunk []ast.Stmt, name string) (proto *FunctionProto, err error) {
 	defer func() {
 		if rcv := recover(); rcv != nil {
 			if _, ok := rcv.(*CompileError); ok {
@@ -1669,4 +1662,4 @@ func Compile(chunk []ast.Stmt, name string) (proto *FunctionProto, err error) { 
 	compileFunctionExpr(context, funcexpr, ecnone(0))
 	proto = context.Proto
 	return
-} // }}}
+}

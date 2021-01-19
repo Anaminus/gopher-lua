@@ -42,7 +42,7 @@ type FunctionProto struct {
 	stringConstants []string
 }
 
-/* Upvalue {{{ */
+//// Upvalue
 
 type Upvalue struct {
 	next   *Upvalue
@@ -83,9 +83,7 @@ func UpvalueIndex(i int) int {
 	return GlobalsIndex - i
 }
 
-/* }}} */
-
-/* FunctionProto {{{ */
+//// FunctionProto
 
 func newFunctionProto(name string) *FunctionProto {
 	return &FunctionProto{
@@ -148,9 +146,7 @@ func (fp *FunctionProto) str(level int, count int) string {
 	return strings.Join(buf, "")
 }
 
-/* }}} */
-
-/* LFunction {{{ */
+//// LFunction
 
 func newLFunctionL(proto *FunctionProto, env *LTable, nupvalue int) *LFunction {
 	return &LFunction{
@@ -189,5 +185,3 @@ func (fn *LFunction) LocalName(regno, pc int) (string, bool) {
 	}
 	return "", false
 }
-
-/* }}} */

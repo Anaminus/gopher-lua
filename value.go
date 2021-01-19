@@ -29,11 +29,14 @@ func (vt LValueType) String() string {
 type LValue interface {
 	String() string
 	Type() LValueType
-	// to reduce `runtime.assertI2T2` costs, this method should be used instead of the type assertion in heavy paths(typically inside the VM).
+	// To reduce `runtime.assertI2T2` costs, this method should be used instead
+	// of the type assertion in heavy paths (typically inside the VM).
 	assertFloat64() (float64, bool)
-	// to reduce `runtime.assertI2T2` costs, this method should be used instead of the type assertion in heavy paths(typically inside the VM).
+	// To reduce `runtime.assertI2T2` costs, this method should be used instead
+	// of the type assertion in heavy paths (typically inside the VM).
 	assertString() (string, bool)
-	// to reduce `runtime.assertI2T2` costs, this method should be used instead of the type assertion in heavy paths(typically inside the VM).
+	// To reduce `runtime.assertI2T2` costs, this method should be used instead
+	// of the type assertion in heavy paths (typically inside the VM).
 	assertFunction() (*LFunction, bool)
 }
 
@@ -43,8 +46,8 @@ func LVIsFalse(v LValue) bool { return v == LNil || v == LFalse }
 // LVIsFalse returns false if a given LValue is a nil or false otherwise true.
 func LVAsBool(v LValue) bool { return v != LNil && v != LFalse }
 
-// LVAsString returns string representation of a given LValue
-// if the LValue is a string or number, otherwise an empty string.
+// LVAsString returns string representation of a given LValue if the LValue is a
+// string or number, otherwise an empty string.
 func LVAsString(v LValue) string {
 	switch sn := v.(type) {
 	case LString, LNumber:
@@ -112,7 +115,7 @@ func (st LString) assertFloat64() (float64, bool)     { return 0, false }
 func (st LString) assertString() (string, bool)       { return string(st), true }
 func (st LString) assertFunction() (*LFunction, bool) { return nil, false }
 
-// fmt.Formatter interface
+// fmt.Formatter interface.
 func (st LString) Format(f fmt.State, c rune) {
 	switch c {
 	case 'd', 'i':
@@ -138,7 +141,7 @@ func (nm LNumber) assertFloat64() (float64, bool)     { return float64(nm), true
 func (nm LNumber) assertString() (string, bool)       { return "", false }
 func (nm LNumber) assertFunction() (*LFunction, bool) { return nil, false }
 
-// fmt.Formatter interface
+// fmt.Formatter interface.
 func (nm LNumber) Format(f fmt.State, c rune) {
 	switch c {
 	case 'q', 's':

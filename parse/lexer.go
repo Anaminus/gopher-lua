@@ -113,7 +113,7 @@ func (sc *Scanner) skipWhiteSpace(whitespace int64) int {
 }
 
 func (sc *Scanner) skipComments(ch int) error {
-	// multiline comment
+	// Multiline comment.
 	if sc.Peek() == '[' {
 		ch = sc.Next()
 		if sc.Peek() == '[' || sc.Peek() == '=' {
@@ -150,7 +150,7 @@ func (sc *Scanner) scanDecimal(ch int, buf *bytes.Buffer) error {
 }
 
 func (sc *Scanner) scanNumber(ch int, buf *bytes.Buffer) error {
-	if ch == '0' { // octal
+	if ch == '0' { // Octal.
 		if sc.Peek() == 'x' || sc.Peek() == 'X' {
 			writeChar(buf, ch)
 			writeChar(buf, sc.Next())
@@ -423,7 +423,7 @@ finally:
 	return tok, err
 }
 
-// yacc interface {{{
+//// YACC interface
 
 type Lexer struct {
 	scanner       *Scanner
@@ -468,9 +468,7 @@ func Parse(reader io.Reader, name string) (chunk []ast.Stmt, err error) {
 	return
 }
 
-// }}}
-
-// Dump {{{
+//// Dump
 
 func isInlineDumpNode(rv reflect.Value) bool {
 	switch rv.Kind() {
@@ -535,5 +533,3 @@ func dump(node interface{}, level int, s string) string {
 func Dump(chunk []ast.Stmt) string {
 	return dump(chunk, 0, "   ")
 }
-
-// }}

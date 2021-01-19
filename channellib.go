@@ -42,7 +42,7 @@ func channelMake(L *LState) int {
 }
 
 func channelSelect(L *LState) int {
-	//TODO check case table size
+	//TODO: Check case table size.
 	cases := make([]reflect.SelectCase, L.GetTop())
 	top := L.GetTop()
 	for i := 0; i < top; i++ {
@@ -180,5 +180,3 @@ func channelClose(L *LState) int {
 	rch.Close()
 	return 0
 }
-
-//

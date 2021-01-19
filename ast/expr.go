@@ -11,7 +11,7 @@ type ExprBase struct {
 
 func (expr *ExprBase) exprMarker() {}
 
-/* ConstExprs {{{ */
+//// ConstExprs
 
 type ConstExpr interface {
 	Expr
@@ -47,8 +47,6 @@ type StringExpr struct {
 
 	Value string
 }
-
-/* ConstExprs }}} */
 
 type Comma3Expr struct {
 	ExprBase

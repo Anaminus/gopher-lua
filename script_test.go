@@ -108,8 +108,9 @@ func countFinalizers(L *LState) int {
 	return 1
 }
 
-// TestLocalVarFree verifies that tables and user user datas which are no longer referenced by the lua script are
-// correctly gc-ed. There was a bug in gopher lua where local vars were not being gc-ed in all circumstances.
+// TestLocalVarFree verifies that tables and user user datas which are no longer
+// referenced by the lua script are correctly gc-ed. There was a bug in gopher
+// lua where local vars were not being gc-ed in all circumstances.
 func TestLocalVarFree(t *testing.T) {
 	s := `
 		function Test(a, b, c)

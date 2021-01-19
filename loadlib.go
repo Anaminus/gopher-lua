@@ -7,8 +7,6 @@ import (
 	"strings"
 )
 
-/* load lib {{{ */
-
 var loLoaders = []LGFunction{loLoaderPreload, loLoaderLua}
 
 func loGetPath(env string, defpath string) string {
@@ -119,7 +117,3 @@ func loSeeAll(L *LState) int {
 	L.SetField(mt, "__index", L.Get(GlobalsIndex))
 	return 0
 }
-
-/* }}} */
-
-//

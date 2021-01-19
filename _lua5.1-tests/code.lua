@@ -116,7 +116,7 @@ check(function ()
   b[a], a = c, b
   a, b = c, a
   a = a
-end, 
+end,
   'MOVE', 'MOVE', 'SETTABLE',
   'MOVE', 'MOVE', 'MOVE', 'SETTABLE',
   'MOVE', 'MOVE', 'MOVE',

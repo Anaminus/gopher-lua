@@ -33,7 +33,7 @@ assert(not fn and string.find(string.lower(msg), "eof"))
 
 local ok, a, b = xpcall(function()
      return "a", "b"
-  end, 
+  end,
   function(err)
      assert(nil)
   end)
@@ -41,7 +41,7 @@ assert(ok and a == "a" and b == "b")
 
 local ok, a, b = xpcall(function()
      error("error!")
-  end, 
+  end,
   function(err)
      return err .. "!", "b"
   end)

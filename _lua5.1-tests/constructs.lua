@@ -194,7 +194,7 @@ a,b = F(1)~=nil; assert(a == true and b == nil);
 a,b = F(nil)==nil; assert(a == true and b == nil)
 
 ----------------------------------------------------------------
--- creates all combinations of 
+-- creates all combinations of
 -- [not] ([not] arg op [not] (arg op [not] arg ))
 -- and tests each one
 
@@ -224,7 +224,7 @@ repeat
       local a = %s
       local b = not %s
       K = b
-      local xxx; 
+      local xxx;
       if %s then X = a  else X = b end
       if %s then NX = b  else NX = a end
       while %s do WX1 = a; break end

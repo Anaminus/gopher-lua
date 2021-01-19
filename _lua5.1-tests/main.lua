@@ -91,7 +91,7 @@ checkout("1\tnil\n")
 
 prepfile[[
 = (6*2-6) -- ===
-a 
+a
 = 10
 print(a)
 = a]]
@@ -110,15 +110,15 @@ a = 2
 RUN([[lua "-e_PROMPT='%s'" -i < %s > %s]], prompt, prog, out)
 checkout(string.rep(prompt, 3).."\n")
 
-s = [=[ -- 
-function f ( x ) 
+s = [=[ --
+function f ( x )
   local a = [[
 xuxu
 ]]
   local b = "\
 xuxu\n"
   if x == 11 then return 1 , 2 end  --[[ test multiple returns ]]
-  return x + 1 
+  return x + 1
   --\\
 end
 =( f( 10 ) )
@@ -128,7 +128,7 @@ s = string.gsub(s, ' ', '\n\n')
 prepfile(s)
 RUN([[lua -e"_PROMPT='' _PROMPT2=''" -i < %s > %s]], prog, out)
 checkout("11\n1\t2\n\n")
-  
+
 prepfile[[#comment in 1st line without \n at the end]]
 RUN("lua %s", prog)
 

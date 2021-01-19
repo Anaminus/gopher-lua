@@ -94,7 +94,7 @@ x.a()]], "field 'a'")
 checkmessage([[
 prefix = nil
 insert = nil
-while 1 do  
+while 1 do
   local a
   if nil then break end
   insert(prefix, a)
@@ -240,7 +240,7 @@ assert(string.find(b, "line 3"))
 -- local variables
 s = "\nfunction foo ()\n  local "
 for j = 1,300 do
-  s = s.."a"..j..", " 
+  s = s.."a"..j..", "
 end
 s = s.."b\n"
 local a,b = loadstring(s)

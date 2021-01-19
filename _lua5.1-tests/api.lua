@@ -348,7 +348,7 @@ do
   local x = collectgarbage("count");
   local a = T.newuserdata(5001)
   assert(T.testC("objsize 2; return 1", a) == 5001)
-  assert(collectgarbage("count") >= x+4) 
+  assert(collectgarbage("count") >= x+4)
   a = nil
   collectgarbage();
   assert(collectgarbage("count") <= x+1)

@@ -248,7 +248,7 @@ assert(debug.getinfo(a).source == "modname")
 -- i = 0
 -- local a, b = load(read1("*a = 123"))
 -- assert(not a and type(b) == "string" and i == 2)
--- 
+--
 -- a, b = load(function () error("hhi") end)
 -- assert(not a and string.find(b, "hhi"))
 

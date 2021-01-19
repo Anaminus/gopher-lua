@@ -69,8 +69,8 @@ assert(io.type(f) == "closed file")
 io.input(file)
 local of =io.open(otherfile)
 f = of:lines()
-for l in io.lines() do 
-  assert(l == f()) 
+for l in io.lines() do
+  assert(l == f())
 end
 of:close()
 assert(os.remove(otherfile))
@@ -269,9 +269,9 @@ local t = os.time()
 -- loadstring(os.date([[assert(T.year==%Y and T.month==%m and T.day==%d and
 --   T.hour==%H and T.min==%M and T.sec==%S and
 --   T.wday==%w+1 and T.yday==%j and type(T.isdst) == 'boolean')]], t))()
--- 
+--
 -- assert(os.time(T) == t)
--- 
+--
 T = os.date("!*t", t)
 -- loadstring(os.date([[!assert(T.year==%Y and T.month==%m and T.day==%d and
 --   T.hour==%H and T.min==%M and T.sec==%S and
@@ -284,7 +284,7 @@ do
   T.isdst = nil
   local t1 = os.time(T)
   assert(t == t1)   -- if isdst is absent uses correct default
-end   
+end
 
 t = os.time(T)
 T.year = T.year-1;

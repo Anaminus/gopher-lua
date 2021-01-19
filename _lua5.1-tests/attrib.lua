@@ -205,7 +205,7 @@ else
   module("lib1.sub", package.seeall)
   assert(_M == fs)
   setfenv(1, _G)
- 
+
 end
 -- f, err, when = package.loadlib("donotexist", p.."xuxu")
 -- assert(not f and type(err) == "string" and (when == "open" or when == "absent"))

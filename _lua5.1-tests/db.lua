@@ -241,7 +241,7 @@ end
 function g(a,b) return (a+1) + f() end
 
 assert(g(0,0) == 30)
- 
+
 
 debug.sethook(nil);
 assert(debug.gethook() == nil)
@@ -257,7 +257,7 @@ debug.sethook(function (e)
   dostring("XX = 12")  -- test dostring inside hooks
   -- testing errors inside hooks
   assert(not pcall(loadstring("a='joao'+1")))
-  debug.sethook(function (e, l) 
+  debug.sethook(function (e, l)
     assert(debug.getinfo(2, "l").currentline == l)
     local f,m,c = debug.gethook()
     assert(e == "line")
@@ -308,8 +308,8 @@ assert(t.a == 1 and t.b == 2 and t.c == 3)
 assert(debug.setupvalue(foo1, 1, "xuxu") == "b")
 assert(({debug.getupvalue(foo2, 3)})[2] == "xuxu")
 -- cannot manipulate C upvalues from Lua
-assert(debug.getupvalue(io.read, 1) == nil)  
-assert(debug.setupvalue(io.read, 1, 10) == nil)  
+assert(debug.getupvalue(io.read, 1) == nil)
+assert(debug.setupvalue(io.read, 1, 10) == nil)
 
 
 -- testing count hooks

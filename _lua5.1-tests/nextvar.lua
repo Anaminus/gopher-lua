@@ -39,7 +39,7 @@ while a < lim do
   a = math.ceil(a*1.3)
 end
 
- 
+
 local function check (t, na, nh)
   local a, h = T.querytab(t)
   if a ~= na or h ~= nh then
@@ -54,7 +54,7 @@ local s = 'return {'
 for i=1,lim do
   s = s..i..','
   local s = s
-  for k=0,lim do 
+  for k=0,lim do
     local t = loadstring(s..'}')()
     assert(#t == i)
     check(t, fb(i), mp2(k))

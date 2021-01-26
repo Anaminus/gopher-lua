@@ -646,9 +646,6 @@ func (ls *LState) raiseError(level int, format string, args ...interface{}) {
 	if len(args) > 0 {
 		message = fmt.Sprintf(format, args...)
 	}
-	if level > 0 {
-		message = fmt.Sprintf("%v %v", ls.where(level-1, true), message)
-	}
 	if ls.reg.IsFull() {
 		// If the registry is full then it won't be possible to push a value, in
 		// this case, force a larger size.

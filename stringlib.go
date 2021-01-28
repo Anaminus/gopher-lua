@@ -17,8 +17,9 @@ func OpenString(L *LState) int {
 	gmatch := L.NewClosure(strGmatch, L.NewFunction(strGmatchIter))
 	mod.RawSetString("gmatch", gmatch)
 	mod.RawSetString("gfind", gmatch)
-	mod.RawSetString("__index", mod)
-	L.G.builtinMts[int(LTString)] = mod
+	mt := L.CreateTable(0, 1)
+	mt.RawSetString("__index", mod)
+	L.G.builtinMts[int(LTString)] = mt
 	//}
 	L.Push(mod)
 	return 1

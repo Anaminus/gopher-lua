@@ -169,7 +169,9 @@ func TestTableForEach(t *testing.T) {
 	tbl.RawSetH(LTrue, LString("true"))
 	tbl.RawSetH(LFalse, LString("false"))
 
-	tbl.ForEach(func(key, value LValue) {
+	count := 0
+	if err := tbl.ForEach(func(key, value LValue) error {
+		count++
 		switch k := key.(type) {
 		case LBool:
 			switch bool(k) {
@@ -205,5 +207,26 @@ func TestTableForEach(t *testing.T) {
 				t.Fail()
 			}
 		}
+		return nil
+	}); err != nil {
+		t.Errorf("unexpected error: %w", err)
+	}
+	if count != 9 {
+		t.Errorf("expected 9 iterations, got %d", count)
+	}
+
+	count = 0
+	err := tbl.ForEach(func(key, value LValue) error {
+		count++
+		if count >= 5 {
+			return Break
+		}
+		return nil
 	})
+	if err != nil {
+		t.Errorf("unexpected error: %w", err)
+	}
+	if count != 5 {
+		t.Errorf("expected 5 iterations, got %d", count)
+	}
 }

@@ -1,5 +1,7 @@
 package lua
 
+import "errors"
+
 const defaultArrayCap = 32
 const defaultHashCap = 32
 
@@ -328,30 +330,51 @@ func (tb *LTable) RawGetString(key string) LValue {
 	return LNil
 }
 
+// Break can be returned by the callback to LTable.ForEach to cancel iteration.
+var Break = errors.New("break")
+
 // ForEach iterates over this table of elements, yielding each in turn to a
 // given function.
-func (tb *LTable) ForEach(cb func(LValue, LValue)) {
+//
+// If cb returns Break, then ForEach cancels iteration, and returns nil.
+func (tb *LTable) ForEach(cb func(LValue, LValue) error) error {
 	if tb.array != nil {
 		for i, v := range tb.array {
 			if v != LNil {
-				cb(LNumber(i+1), v)
+				if err := cb(LNumber(i+1), v); err != nil {
+					if err == Break {
+						return nil
+					}
+					return err
+				}
 			}
 		}
 	}
 	if tb.strdict != nil {
 		for k, v := range tb.strdict {
 			if v != LNil {
-				cb(LString(k), v)
+				if err := cb(LString(k), v); err != nil {
+					if err == Break {
+						return nil
+					}
+					return err
+				}
 			}
 		}
 	}
 	if tb.dict != nil {
 		for k, v := range tb.dict {
 			if v != LNil {
-				cb(k, v)
+				if err := cb(k, v); err != nil {
+					if err == Break {
+						return nil
+					}
+					return err
+				}
 			}
 		}
 	}
+	return nil
 }
 
 // This function is equivalent to lua_next

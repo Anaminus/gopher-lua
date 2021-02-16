@@ -1703,8 +1703,8 @@ func (ls *LState) SetTable(obj LValue, key LValue, value LValue) {
 	ls.setField(obj, key, value)
 }
 
-func (ls *LState) ForEach(tb *LTable, cb func(LValue, LValue)) {
-	tb.ForEach(cb)
+func (ls *LState) ForEach(tb *LTable, cb func(LValue, LValue) error) error {
+	return tb.ForEach(cb)
 }
 
 func (ls *LState) GetGlobal(name string) LValue {

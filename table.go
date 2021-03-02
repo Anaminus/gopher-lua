@@ -143,6 +143,37 @@ func (tb *LTable) Remove(pos int) LValue {
 	return oldval
 }
 
+// Clear removes all elements from the table.
+func (tb *LTable) Clear() {
+	if tb.array != nil {
+		for i := range tb.array {
+			tb.array[i] = nil
+		}
+		tb.array = tb.array[:0]
+	}
+	if tb.dict != nil {
+		for k := range tb.dict {
+			delete(tb.dict, k)
+		}
+	}
+	if tb.strdict != nil {
+		for k := range tb.strdict {
+			delete(tb.strdict, k)
+		}
+	}
+	if tb.keys != nil {
+		for i := range tb.keys {
+			tb.keys[i] = nil
+		}
+		tb.keys = tb.keys[:0]
+	}
+	if tb.k2i != nil {
+		for k := range tb.k2i {
+			delete(tb.k2i, k)
+		}
+	}
+}
+
 // RawSet sets a given LValue to a given index without the __newindex
 // metamethod. It is recommended to use `RawSetString` or `RawSetInt` for
 // performance if you already know the given LValue is a string or number.

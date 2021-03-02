@@ -110,6 +110,32 @@ func TestTableRemove(t *testing.T) {
 
 }
 
+func TestTableClear(t *testing.T) {
+	tbl := newLTable(0, 0)
+	tbl.Append(LTrue)
+	tbl.Append(LTrue)
+	tbl.Append(LTrue)
+	tbl.RawSetString("string", LTrue)
+	tbl.RawSet(LTrue, LTrue)
+	tbl.RawSet(LFalse, LTrue)
+
+	errorIfNotEqual(t, 3, tbl.MaxN())
+	k, v := tbl.Next(LNil)
+	if k == LNil {
+		t.Errorf("%v '%v' expected, but got '%v'", positionString(1), LNil, k)
+	}
+	if v == LNil {
+		t.Errorf("%v '%v' expected, but got '%v'", positionString(1), LNil, v)
+	}
+
+	tbl.Clear()
+
+	errorIfNotEqual(t, 0, tbl.MaxN())
+	k, v = tbl.Next(LNil)
+	errorIfNotEqual(t, LNil, k)
+	errorIfNotEqual(t, LNil, v)
+}
+
 func TestTableRawSetInt(t *testing.T) {
 	tbl := newLTable(0, 0)
 	tbl.RawSetInt(MaxArrayIndex+1, LTrue)

@@ -1065,7 +1065,7 @@ func (ls *LState) getField(obj LValue, key LValue) LValue {
 		metaindex := ls.metaOp1(curobj, "__index")
 		if metaindex == LNil {
 			if !istable {
-				ls.RaiseError("attempt to index a non-table object(%v) with key '%s'", curobj.Type().String(), key.String())
+				ls.RaiseError("attempt to index %v with key '%s'", curobj.Type().String(), key.String())
 			}
 			return LNil
 		}
@@ -1096,7 +1096,7 @@ func (ls *LState) getFieldString(obj LValue, key string) LValue {
 		metaindex := ls.metaOp1(curobj, "__index")
 		if metaindex == LNil {
 			if !istable {
-				ls.RaiseError("attempt to index a non-table object(%v) with key '%s'", curobj.Type().String(), key)
+				ls.RaiseError("attempt to index %v with key '%s'", curobj.Type().String(), key)
 			}
 			return LNil
 		}
@@ -1127,7 +1127,7 @@ func (ls *LState) setField(obj LValue, key LValue, value LValue) {
 		metaindex := ls.metaOp1(curobj, "__newindex")
 		if metaindex == LNil {
 			if !istable {
-				ls.RaiseError("attempt to index a non-table object(%v) with key '%s'", curobj.Type().String(), key.String())
+				ls.RaiseError("attempt to index %v with key '%s'", curobj.Type().String(), key.String())
 			}
 			ls.RawSet(tb, key, value)
 			return
@@ -1159,7 +1159,7 @@ func (ls *LState) setFieldString(obj LValue, key string, value LValue) {
 		metaindex := ls.metaOp1(curobj, "__newindex")
 		if metaindex == LNil {
 			if !istable {
-				ls.RaiseError("attempt to index a non-table object(%v) with key '%s'", curobj.Type().String(), key)
+				ls.RaiseError("attempt to index %v with key '%s'", curobj.Type().String(), key)
 			}
 			tb.RawSetString(key, value)
 			return

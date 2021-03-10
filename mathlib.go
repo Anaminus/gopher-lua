@@ -193,6 +193,9 @@ func mathRandom(L *LState) int {
 	default:
 		min := L.CheckInt(1)
 		max := L.CheckInt(2) + 1
+		if min > max {
+			L.ArgError(1, "interval is empty")
+		}
 		L.Push(LNumber(rand.Intn(max-min) + min))
 	}
 	return 1

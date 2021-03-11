@@ -230,7 +230,7 @@ func (ls *LState) assertString() (string, bool)       { return "", false }
 func (ls *LState) assertFunction() (*LFunction, bool) { return nil, false }
 
 type LUserData struct {
-	Value     interface{}
+	value     interface{}
 	Env       *LTable
 	Metatable LValue
 }
@@ -240,6 +240,7 @@ func (ud *LUserData) Type() LValueType                   { return LTUserData }
 func (ud *LUserData) assertFloat64() (float64, bool)     { return 0, false }
 func (ud *LUserData) assertString() (string, bool)       { return "", false }
 func (ud *LUserData) assertFunction() (*LFunction, bool) { return nil, false }
+func (ud *LUserData) Value() interface{}                 { return ud.value }
 
 type LChannel chan LValue
 

@@ -98,7 +98,7 @@ func TestCheckUserData(t *testing.T) {
 	L := NewState()
 	defer L.Close()
 	errorIfGFuncNotFail(t, L, func(L *LState) int {
-		ud := L.NewUserData()
+		ud := L.NewUserData(nil)
 		L.Push(ud)
 		errorIfNotEqual(t, ud, L.CheckUserData(2))
 		L.Push(LNumber(10))
@@ -271,9 +271,9 @@ func TestOptUserData(t *testing.T) {
 	L := NewState()
 	defer L.Close()
 	errorIfGFuncNotFail(t, L, func(L *LState) int {
-		defud := L.NewUserData()
+		defud := L.NewUserData(nil)
 		errorIfNotEqual(t, defud, L.OptUserData(1, defud))
-		ud := L.NewUserData()
+		ud := L.NewUserData(nil)
 		L.Push(ud)
 		errorIfNotEqual(t, ud, L.OptUserData(2, defud))
 		L.Push(LNumber(10))

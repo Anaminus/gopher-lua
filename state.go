@@ -1404,8 +1404,9 @@ func (ls *LState) NewFunctionFromProto(proto *FunctionProto) *LFunction {
 	return newLFunctionL(proto, ls.Env, int(proto.NumUpvalues))
 }
 
-func (ls *LState) NewUserData() *LUserData {
+func (ls *LState) NewUserData(value interface{}) *LUserData {
 	return &LUserData{
+		value:     value,
 		Env:       ls.currentEnv(),
 		Metatable: LNil,
 	}

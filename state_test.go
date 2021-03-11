@@ -234,7 +234,7 @@ func TestToUserData(t *testing.T) {
 	defer L.Close()
 	L.Push(LNumber(10))
 	L.Push(LString("99.9"))
-	L.Push(L.NewUserData())
+	L.Push(L.NewUserData(nil))
 	errorIfFalse(t, L.ToUserData(1) == nil, "index 1 must be nil")
 	errorIfFalse(t, L.ToUserData(2) == nil, "index 2 must be nil")
 	errorIfNotEqual(t, L.Get(3), L.ToUserData(3))

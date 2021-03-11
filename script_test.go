@@ -87,10 +87,9 @@ var numActiveUserDatas int32 = 0
 type finalizerStub struct{ x byte }
 
 func allocFinalizerUserData(L *LState) int {
-	ud := L.NewUserData()
 	atomic.AddInt32(&numActiveUserDatas, 1)
 	a := finalizerStub{}
-	ud.Value = &a
+	ud := L.NewUserData(&a)
 	runtime.SetFinalizer(&a, func(aa *finalizerStub) {
 		atomic.AddInt32(&numActiveUserDatas, -1)
 	})

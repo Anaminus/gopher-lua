@@ -572,7 +572,7 @@ loopbreak:
 //// Hidden features
 
 func baseNewProxy(L *LState) int {
-	ud := L.NewUserData()
+	ud := L.NewUserData(nil)
 	L.SetTop(1)
 	if L.Get(1) == LTrue {
 		L.SetMetatable(ud, L.NewTable())

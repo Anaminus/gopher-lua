@@ -50,7 +50,7 @@ const fileDefaultReadBuffer = 4096
 
 func checkFile(L *LState) *lFile {
 	ud := L.CheckUserData(1)
-	if file, ok := ud.Value.(*lFile); ok {
+	if file, ok := ud.Value().(*lFile); ok {
 		return file
 	}
 	L.ArgError(1, "file expected")
@@ -64,7 +64,6 @@ func errorIfFileIsClosed(L *LState, file *lFile) {
 }
 
 func newFile(L *LState, file *os.File, path string, flag int, perm os.FileMode, writable, readable bool) (*LUserData, error) {
-	ud := L.NewUserData()
 	var err error
 	if file == nil {
 		file, err = os.OpenFile(path, flag, perm)
@@ -73,7 +72,7 @@ func newFile(L *LState, file *os.File, path string, flag int, perm os.FileMode, 
 		}
 	}
 	lfile := &lFile{fp: file, pp: nil, writer: nil, reader: nil, stdout: nil, closed: false}
-	ud.Value = lfile
+	ud := L.NewUserData(lfile)
 	if writable {
 		lfile.writer = file
 	}
@@ -85,11 +84,10 @@ func newFile(L *LState, file *os.File, path string, flag int, perm os.FileMode, 
 }
 
 func newProcess(L *LState, cmd string, writable, readable bool) (*LUserData, error) {
-	ud := L.NewUserData()
 	c, args := popenArgs(cmd)
 	pp := exec.Command(c, args...)
 	lfile := &lFile{fp: nil, pp: pp, writer: nil, reader: nil, stdout: nil, closed: false}
-	ud.Value = lfile
+	ud := L.NewUserData(lfile)
 
 	var err error
 	if writable {
@@ -468,9 +466,9 @@ func fileFlush(L *LState) int {
 func fileLinesIter(L *LState) int {
 	var file *lFile
 	if ud, ok := L.Get(1).(*LUserData); ok {
-		file = ud.Value.(*lFile)
+		file = ud.Value().(*lFile)
 	} else {
-		file = L.Get(UpvalueIndex(2)).(*LUserData).Value.(*lFile)
+		file = L.Get(UpvalueIndex(2)).(*LUserData).Value().(*lFile)
 	}
 	buf, _, err := file.reader.ReadLine()
 	if err != nil {
@@ -554,7 +552,7 @@ func ioInput(L *LState) int {
 		L.Push(file)
 		return 1
 	case *LUserData:
-		if _, ok := lv.Value.(*lFile); ok {
+		if _, ok := lv.Value().(*lFile); ok {
 			L.Get(UpvalueIndex(1)).(*LTable).RawSetInt(fileDefInIndex, lv)
 			L.Push(lv)
 			return 1
@@ -567,22 +565,22 @@ func ioInput(L *LState) int {
 
 func ioClose(L *LState) int {
 	if L.GetTop() == 0 {
-		return fileCloseAux(L, fileDefOut(L).Value.(*lFile))
+		return fileCloseAux(L, fileDefOut(L).Value().(*lFile))
 	}
 	return fileClose(L)
 }
 
 func ioFlush(L *LState) int {
-	return fileFlushAux(L, fileDefOut(L).Value.(*lFile))
+	return fileFlushAux(L, fileDefOut(L).Value().(*lFile))
 }
 
 func ioLinesIter(L *LState) int {
 	var file *lFile
 	toclose := false
 	if ud, ok := L.Get(1).(*LUserData); ok {
-		file = ud.Value.(*lFile)
+		file = ud.Value().(*lFile)
 	} else {
-		file = L.Get(UpvalueIndex(2)).(*LUserData).Value.(*lFile)
+		file = L.Get(UpvalueIndex(2)).(*LUserData).Value().(*lFile)
 		toclose = true
 	}
 	buf, _, err := file.reader.ReadLine()
@@ -682,7 +680,7 @@ func ioPopen(L *LState) int {
 }
 
 func ioRead(L *LState) int {
-	return fileReadAux(L, fileDefIn(L).Value.(*lFile), 1)
+	return fileReadAux(L, fileDefIn(L).Value().(*lFile), 1)
 }
 
 func ioType(L *LState) int {
@@ -691,7 +689,7 @@ func ioType(L *LState) int {
 		L.Push(LNil)
 		return 1
 	}
-	file, ok := ud.Value.(*lFile)
+	file, ok := ud.Value().(*lFile)
 	if !ok {
 		L.Push(LNil)
 		return 1
@@ -732,7 +730,7 @@ func ioOutput(L *LState) int {
 		L.Push(file)
 		return 1
 	case *LUserData:
-		if _, ok := lv.Value.(*lFile); ok {
+		if _, ok := lv.Value().(*lFile); ok {
 			L.Get(UpvalueIndex(1)).(*LTable).RawSetInt(fileDefOutIndex, lv)
 			L.Push(lv)
 			return 1
@@ -744,5 +742,5 @@ func ioOutput(L *LState) int {
 }
 
 func ioWrite(L *LState) int {
-	return fileWriteAux(L, fileDefOut(L).Value.(*lFile), 1)
+	return fileWriteAux(L, fileDefOut(L).Value().(*lFile), 1)
 }
